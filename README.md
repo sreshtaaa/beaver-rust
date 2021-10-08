@@ -1,1 +1,1 @@
-# static-resin-rust
+# Static Resin
