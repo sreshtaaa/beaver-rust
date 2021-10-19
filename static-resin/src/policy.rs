@@ -4,8 +4,8 @@ mod filter;
 pub use crate::filter;
 
 trait Policy<A> {
-    fn export_check(self, ctxt: filter::Context); 
-    fn merge(self, _other: Policy<A>);
+    fn export_check(self, ctxt: filter::Context) -> Result<(), PolicyError>; 
+    fn merge(self, _other: Policy<A>) -> Result<Policy<A>, PolicyError>;
 }
 
 struct Grade {
@@ -24,8 +24,8 @@ impl Policy<Grade> for Grade {
                 } else {
                     return Err(PolicyError { message: "File must belong to same student" })
                 }
-           },
-           filter::Context::ClientNetwork => { 
+            },
+            filter::Context::ClientNetwork => { 
                return Err(PolicyError { message: "Cannot send grade over network" });
             },
             filter::Context::ServerNetwork => { 
