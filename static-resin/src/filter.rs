@@ -14,10 +14,10 @@ mod filter {
     }
     
     pub struct ClientNetworkContext {
-        ip_address: net::IPAddr,
+        ip_address: std::net::IPAddr,
     }
     
     pub struct ServerNetworkContext {
-        ip_address: net::IPAddr,
+        ip_address: std::net::IPAddr,
     }
 }

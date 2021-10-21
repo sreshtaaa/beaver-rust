@@ -1,7 +1,6 @@
 use std::fmt;
 
-mod filter;
-pub use crate::filter;
+use crate::filter;
 
 trait Policy<A> {
     fn export_check(self, ctxt: filter::Context) -> Result<(), PolicyError>; 
@@ -10,14 +9,13 @@ trait Policy<A> {
 
 struct Grade {
     studentId: String, 
-    grade: Number, 
-};
+    grade: i32, 
+}
 
 impl Policy<Grade> for Grade {
-    fn export_check(self, ctxt: filter::Context) 
-    -> Result<(), PolicyError>{
+    fn export_check(self, ctxt: filter::Context) -> Result<(), PolicyError> {
        match ctxt {
-            filter::Context::File(fc: filter::FileContext) => {
+            filter::Context::File(fc) => {
                 // pretend studentId is the filename
                 if (fc.file_name.eq(self.studentId)) {
                     return Ok(());
@@ -34,7 +32,7 @@ impl Policy<Grade> for Grade {
        }
     }
     fn merge(self, _other: Policy<Grade>) -> Result<Policy<Grade>, PolicyError>{
-        return Err(PolicyError { message: "Cannot merge grades"}});
+        return Err(PolicyError { message: "Cannot merge grades"});
     }
 }
 
@@ -45,6 +43,6 @@ struct PolicyError {
 
 impl fmt::Display for PolicyError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, &self.message);
+        write!(f, "{}", &self.message);
     }
 }
