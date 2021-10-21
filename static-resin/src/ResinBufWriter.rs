@@ -9,11 +9,10 @@ pub struct ResinBufWriter<W: Write> {
 }
 
 impl ResinBufWriter<W> {
-    fn safe_write(&mut self, buf: &Policy<[u8]>) -> Result<usize> {
+    fn safe_write(&mut self, buf: &StringablePolicy<Grade>) -> Result<usize> {
         match buf.export_check(self.ctxt) {
-            Ok => {
-                // perhaps serialize the policy
-                return self.bufWriter.write(buf.get(...));
+            Ok(_) => {
+                return self.bufWriter.write(buf.toString());
             },
             Err(pe: PolicyError) => {
                 return Err(pe);
