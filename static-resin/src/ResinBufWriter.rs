@@ -20,3 +20,7 @@ impl ResinBufWriter<W> {
         }
     }
 }
+
+// problem: how to get information from StringablePolicy in a protected way?
+// check rust access modifiers and what impact it has on the code. 
+// factor out pieces from BEAVER library and things that come from app code.

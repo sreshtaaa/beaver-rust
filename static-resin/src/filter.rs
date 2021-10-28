@@ -1,4 +1,3 @@
-use std::io;
 use std::net;
 
 pub enum Context {
@@ -7,6 +6,7 @@ pub enum Context {
     ServerNetwork(ServerNetworkContext),
 }
 
+// infer from file object? 
 pub struct FileContext {
     pub(crate) file_name: String,
     path: String,
