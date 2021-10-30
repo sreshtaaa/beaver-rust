@@ -1,35 +1,55 @@
 use std::fmt;
 use crate::filter;
+use std::error::Error;
 
-trait Policy<A> {
-    fn export_check(self, ctxt: filter::Context) -> Result<A, PolicyError>; 
+pub trait Policy<A> {
+    fn export_check(&self, ctxt: &filter::Context) -> Result<(), PolicyError>; 
     fn merge(self, _other: Box<dyn Policy<A>>) -> Result<Box<dyn Policy<A>>, PolicyError>;
 }
 
-trait StringablePolicy<A> : Policy<A> {
-    fn toString(self) -> String;
+pub trait StringablePolicy<A> : Policy<A> {
+    fn to_string(&self) -> String; // TODO: think about how to get data out such that only filter object can do so
+                                   // one thought: force it to call export_check
+}
+
+#[derive(Debug, Clone)]
+pub struct PolicyError {
+    message: String,
+}
+
+// impl generic error trait for policerror
+impl fmt::Display for PolicyError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", &self.message)
+    }
+}
+
+impl Error for PolicyError {
+    fn description(&self) -> &str {
+        &self.message
+    }
 }
 
 pub struct Grade {
-    studentId: String, 
+    student_id: String, 
     grade: i64, 
 }
 
 impl Grade {
-    pub fn make(studentId: String, grade: i64) -> Grade {
+    pub fn make(student_id: String, grade: i64) -> Grade {
         Grade {
-            studentId, grade
+            student_id, grade
         }
     }
 }
 
 impl Policy<Grade> for Grade {
-    fn export_check(self, ctxt: filter::Context) -> Result<Grade, PolicyError> {
+    fn export_check(&self, ctxt: &filter::Context) -> Result<(), PolicyError> {
        match ctxt {
             filter::Context::File(fc) => {
                 // pretend studentId is the filename
-                if (fc.file_name.eq(&self.studentId)) {
-                    return Ok(self);
+                if fc.file_name.eq(&self.student_id) {
+                    return Ok(());
                 } else {
                     return Err(PolicyError { message: "File must belong to same student".to_string() })
                 }
@@ -48,18 +68,7 @@ impl Policy<Grade> for Grade {
 }
 
 impl StringablePolicy<Grade> for Grade {
-    fn toString(self) -> String {
-        return format!("{} {}", self.studentId, self.grade);
-    }
-}
-
-#[derive(Debug, Clone)]
-pub struct PolicyError {
-    message: String,
-}
-
-impl fmt::Display for PolicyError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", &self.message)
+    fn to_string(&self) -> String {
+        return format!("{} {}", self.student_id, self.grade);
     }
 }
