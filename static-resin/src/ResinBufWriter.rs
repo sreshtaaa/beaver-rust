@@ -1,21 +1,28 @@
-use std::io;
+use std::io::{BufWriter, Write, Error};
+//use std::error;
 
-mod filter;
-pub use crate::filter;
+use crate::policy;
+use crate::filter;
 
 pub struct ResinBufWriter<W: Write> {
-    bufWriter: io::BufWriter<W: Write>,
+    buf_writer: BufWriter<W>,
     ctxt: filter::Context,
 }
 
-impl ResinBufWriter<W> {
-    fn safe_write(&mut self, buf: &StringablePolicy<Grade>) -> Result<usize> {
-        match buf.export_check(self.ctxt) {
+impl<W: Write> ResinBufWriter<W> {
+    pub fn safe_create(inner: W, context: filter::Context) -> ResinBufWriter<W> {
+        ResinBufWriter {
+            buf_writer: BufWriter::new(inner), 
+            ctxt: context,
+        }
+    }
+    pub fn safe_write<A>(&mut self, buf: &policy::StringablePolicy<A>) -> Result<usize, Error> {
+        match buf.export_check(&self.ctxt) {
             Ok(_) => {
-                return self.bufWriter.write(buf.toString());
+                return self.buf_writer.write(buf.to_string().as_bytes());
             },
-            Err(pe: PolicyError) => {
-                return Err(pe);
+            Err(pe) => { // TODO: implement this so that it returns either an error::Error or an io::Error and not panic
+                panic!("Policy check failed");
             },
         }
     }
