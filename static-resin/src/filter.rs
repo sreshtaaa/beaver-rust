@@ -9,7 +9,7 @@ pub enum Context {
 
 pub struct FileContext {
     pub(crate) file_name: String,
-    path: String,
+    pub path: String,
 }
 
 pub struct ClientNetworkContext {
