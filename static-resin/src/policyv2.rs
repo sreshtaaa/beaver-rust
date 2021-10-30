@@ -6,7 +6,7 @@ pub trait Policied<P : Policy> {
 }
 
 pub trait Policy {
-    fn export_check(&self, ctxt: filter::Context) -> Result<(), PolicyError>; 
+    fn export_check(&self, ctxt: &filter::Context) -> Result<(), PolicyError>; 
     fn merge(&self, _other: Box<dyn Policy>) -> Result<Box<dyn Policy>, PolicyError>;
 }
 
@@ -23,7 +23,7 @@ impl fmt::Display for PolicyError {
 pub struct GradePolicy { pub studentId: String }
 
 impl Policy for GradePolicy {
-    fn export_check(&self, ctxt: filter::Context) -> Result<(), PolicyError> {
+    fn export_check(&self, ctxt: &filter::Context) -> Result<(), PolicyError> {
         match ctxt {
              filter::Context::File(fc) => {
                  // pretend studentId is the filename
@@ -67,6 +67,13 @@ pub struct PoliciedString<P : Policy> {
 
 impl<P : Policy + Clone> Policied<P> for PoliciedString<P> {
     fn get_policy(&self) -> Box<P> { Box::new(self.policy.clone()) }
+}
+
+impl<P : Policy> PoliciedString<P> {
+    pub(crate) fn to_string(&self) -> String {
+        return format!("{}", self.string);
+    } // TODO: think about how to get data out such that only filter object can do so
+                                   // one thought: force it to call export_check
 }
 
 pub struct PoliciedNumber<P : Policy> {
