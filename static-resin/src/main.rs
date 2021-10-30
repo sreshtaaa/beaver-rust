@@ -1,17 +1,17 @@
-mod policyv2;
+mod policy;
 use std::fs::File;
 use std::io::{Write, Error};
 mod filter;
 mod ResinBufWriter;
-use crate::policyv2::Policied;
+use crate::policy::Policied;
 
 fn main() {
     println!("Hello, world!");
-    let gp = policyv2::GradePolicy { studentId: "malte".to_string() };
+    let gp = policy::GradePolicy { studentId: "malte".to_string() };
 
     // make a protected grade object— see policy.rs for the impl of Policy on the grade
-    let malte_grade = policyv2::Grade::make("malte".to_string(), 85, gp.clone()); 
-    let kinan_grade = policyv2::Grade::make("kinan".to_string(), 87, gp.clone());
+    let malte_grade = policy::Grade::make("malte".to_string(), 85, gp.clone()); 
+    let kinan_grade = policy::Grade::make("kinan".to_string(), 87, gp.clone());
 
     let gp_copy = malte_grade.get_policy();
 

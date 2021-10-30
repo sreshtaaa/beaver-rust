@@ -1,74 +1,108 @@
 use std::fmt;
 use crate::filter;
-use std::error::Error;
 
-pub trait Policy<A> {
-    fn export_check(&self, ctxt: &filter::Context) -> Result<(), PolicyError>; 
-    fn merge(self, _other: Box<dyn Policy<A>>) -> Result<Box<dyn Policy<A>>, PolicyError>;
+pub trait Policied<P : Policy> {
+    fn get_policy(&self) -> Box<P>;
 }
 
-pub trait StringablePolicy<A> : Policy<A> {
-    fn to_string(&self) -> String; // TODO: think about how to get data out such that only filter object can do so
-                                   // one thought: force it to call export_check
+pub trait Policy {
+    fn export_check(&self, ctxt: &filter::Context) -> Result<(), PolicyError>; 
+    fn merge(&self, _other: Box<dyn Policy>) -> Result<Box<dyn Policy>, PolicyError>;
 }
 
 #[derive(Debug, Clone)]
-pub struct PolicyError {
-    message: String,
-}
+pub struct PolicyError { message: String }
 
-// impl generic error trait for policerror
 impl fmt::Display for PolicyError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", &self.message)
     }
 }
 
-impl Error for PolicyError {
-    fn description(&self) -> &str {
-        &self.message
-    }
+#[derive(Clone)]
+pub struct GradePolicy { pub studentId: String }
+
+impl Policy for GradePolicy {
+    fn export_check(&self, ctxt: &filter::Context) -> Result<(), PolicyError> {
+        match ctxt {
+             filter::Context::File(fc) => {
+                 // pretend studentId is the filename
+                 if fc.file_name.eq(&self.studentId) {
+                     return Ok(());
+                 } else {
+                     return Err(PolicyError { message: "File must belong to same student".to_string() })
+                 }
+             },
+             filter::Context::ClientNetwork(_) => { 
+                return Err(PolicyError { message: "Cannot send grade over network".to_string() });
+             },
+             filter::Context::ServerNetwork(_) => { 
+                 return Err(PolicyError { message: "Cannot send grade over network".to_string() });
+             },
+        }
+     }
+     fn merge(&self, _other: Box<dyn Policy>) ->  Result<Box<dyn Policy>, PolicyError>{
+         return Err(PolicyError { message: "Cannot merge grades".to_string() });
+     }
 }
 
 pub struct Grade {
-    student_id: String, 
+    studentId: String, 
     grade: i64, 
+    policy: GradePolicy,
+}
+
+// TODO: optimize clone() away
+// can be hidden away
+impl Policied<GradePolicy> for Grade {
+    fn get_policy(&self) -> Box<GradePolicy> { 
+        Box::new(self.policy.clone())
+    }
+}
+
+pub struct PoliciedString<P : Policy> {
+    string: String, 
+    policy: P,
+}
+
+impl<P : Policy + Clone> Policied<P> for PoliciedString<P> {
+    fn get_policy(&self) -> Box<P> { Box::new(self.policy.clone()) }
+}
+
+impl<P : Policy> PoliciedString<P> {
+    pub(crate) fn to_string(&self) -> String {
+        return format!("{}", self.string);
+    } // TODO: think about how to get data out such that only filter object can do so
+                                   // one thought: force it to call export_check
+}
+
+pub struct PoliciedNumber<P : Policy> {
+    number: i64,  
+    policy: P,
+}
+
+impl<P : Policy + Clone> Policied<P> for PoliciedNumber<P> {
+    fn get_policy(&self) -> Box<P> { Box::new(self.policy.clone()) }
 }
 
 impl Grade {
-    pub fn make(student_id: String, grade: i64) -> Grade {
+    pub fn make(studentId: String, grade: i64, policy: GradePolicy) -> Grade {
         Grade {
-            student_id, grade
+            studentId, grade, policy
         }
     }
-}
 
-impl Policy<Grade> for Grade {
-    fn export_check(&self, ctxt: &filter::Context) -> Result<(), PolicyError> {
-       match ctxt {
-            filter::Context::File(fc) => {
-                // pretend studentId is the filename
-                if fc.file_name.eq(&self.student_id) {
-                    return Ok(());
-                } else {
-                    return Err(PolicyError { message: "File must belong to same student".to_string() })
-                }
-            },
-            filter::Context::ClientNetwork(_) => { 
-               return Err(PolicyError { message: "Cannot send grade over network".to_string() });
-            },
-            filter::Context::ServerNetwork(_) => { 
-                return Err(PolicyError { message: "Cannot send grade over network".to_string() });
-            },
-       }
+    pub fn get_studentId(&self) -> Box<PoliciedString<GradePolicy>> {
+        return Box::new(PoliciedString {
+            string: self.studentId.clone(),
+            policy: self.policy.clone()
+        });
     }
-    fn merge(self, _other: Box<dyn Policy<Grade>>) ->  Result<Box<dyn Policy<Grade>>, PolicyError>{
-        return Err(PolicyError { message: "Cannot merge grades".to_string() });
-    }
-}
 
-impl StringablePolicy<Grade> for Grade {
-    fn to_string(&self) -> String {
-        return format!("{} {}", self.student_id, self.grade);
+    pub fn get_grade(&self) -> Box<PoliciedNumber<GradePolicy>> {
+        return Box::new(PoliciedNumber {
+            number: self.grade,
+            policy: self.policy.clone()
+        });
     }
 }

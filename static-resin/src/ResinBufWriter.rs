@@ -1,9 +1,9 @@
 use std::io::{BufWriter, Write, Error};
 //use std::error;
 
-use crate::policyv2;
+use crate::policy;
 use crate::filter;
-use crate::policyv2::Policied;
+use crate::policy::Policied;
 
 pub struct ResinBufWriter<W: Write> {
     buf_writer: BufWriter<W>,
@@ -17,7 +17,7 @@ impl<W: Write> ResinBufWriter<W> {
             ctxt: context,
         }
     }
-    pub fn safe_write<A: policyv2::Policy + Clone>(&mut self, buf: &policyv2::PoliciedString<A>) 
+    pub fn safe_write<A: policy::Policy + Clone>(&mut self, buf: &policy::PoliciedString<A>) 
     -> Result<usize, Error> {
         match buf.get_policy().export_check(&self.ctxt) {
             Ok(_) => {
