@@ -20,14 +20,14 @@ impl fmt::Display for PolicyError {
 }
 
 #[derive(Clone)]
-pub struct GradePolicy { pub studentId: String }
+pub struct GradePolicy { pub student_id: String }
 
 impl Policy for GradePolicy {
     fn export_check(&self, ctxt: &filter::Context) -> Result<(), PolicyError> {
         match ctxt {
              filter::Context::File(fc) => {
-                 // pretend studentId is the filename
-                 if fc.file_name.eq(&self.studentId) {
+                 // pretend student_id is the filename
+                 if fc.file_name.eq(&self.student_id) {
                      return Ok(());
                  } else {
                      return Err(PolicyError { message: "File must belong to same student".to_string() })
@@ -47,7 +47,7 @@ impl Policy for GradePolicy {
 }
 
 pub struct Grade {
-    studentId: String, 
+    student_id: String, 
     grade: i64, 
     policy: GradePolicy,
 }
@@ -86,15 +86,15 @@ impl<P : Policy + Clone> Policied<P> for PoliciedNumber<P> {
 }
 
 impl Grade {
-    pub fn make(studentId: String, grade: i64, policy: GradePolicy) -> Grade {
+    pub fn make(student_id: String, grade: i64, policy: GradePolicy) -> Grade {
         Grade {
-            studentId, grade, policy
+            student_id, grade, policy
         }
     }
 
-    pub fn get_studentId(&self) -> Box<PoliciedString<GradePolicy>> {
+    pub fn get_student_id(&self) -> Box<PoliciedString<GradePolicy>> {
         return Box::new(PoliciedString {
-            string: self.studentId.clone(),
+            string: self.student_id.clone(),
             policy: self.policy.clone()
         });
     }
