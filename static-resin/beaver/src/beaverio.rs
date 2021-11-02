@@ -19,7 +19,7 @@ impl<W: Write> ResinBufWriter<W> {
         }
     }
     pub fn safe_write<A: policy::Policy + Clone>(&mut self, buf: &policy::PoliciedString<A>) 
-    -> Result<usize, Box<Error>> {
+    -> Result<usize, Box<dyn Error>> {
         match buf.get_policy().export_check(&self.ctxt) {
             Ok(_) => {
                 match self.buf_writer.write(buf.string.as_bytes()) {

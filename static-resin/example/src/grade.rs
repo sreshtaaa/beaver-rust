@@ -1,6 +1,3 @@
-use std::fmt;
-use std::net;
-use std::io::{BufWriter, Write, Error};
 use beaver::{policy, filter};
 use beaver::policy::Policy;
 

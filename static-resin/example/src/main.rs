@@ -1,7 +1,6 @@
 use std::fs::File;
-use std::io::{Write, Error};
 mod grade;
-use beaver::{policy, filter, beaverio};
+use beaver::{filter, beaverio};
 
 fn main() {
     println!("Hello, world!");
@@ -13,7 +12,7 @@ fn main() {
     let kinan_grade = grade::Grade::make("kinan".to_string(), 87, gp_kinan);
 
     // try and write to a file
-    let mut f = File::create("malte").expect("Unable to create file");
+    let f = File::create("malte").expect("Unable to create file");
     let ctxt = filter::FileContext {
         file_name: "malte".to_owned(), 
         path: "src/".to_owned(),
