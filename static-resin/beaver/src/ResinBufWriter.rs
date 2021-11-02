@@ -1,5 +1,4 @@
 use std::io::{BufWriter, Write, Error};
-//use std::error;
 
 use crate::policy;
 use crate::filter;

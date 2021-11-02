@@ -8,7 +8,7 @@ pub enum Context {
 
 // infer from file object? 
 pub struct FileContext {
-    pub(crate) file_name: String,
+    pub file_name: String,
     pub path: String,
 }
 
