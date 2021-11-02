@@ -22,13 +22,13 @@ fn main() {
     let mut bw = beaverio::ResinBufWriter::safe_create(f, filter::Context::File(ctxt));
     
     match bw.safe_write(&malte_grade.get_student_id()) {
-        Ok(_) => { println!("Wrote Malte's grade successfully "); },
+        Ok(s) => { println!("Wrote Malte's grade successfully with size: {:?}", s); },
         Err(e) => { println!("Uh oh {:?}", e); }
-    } // this should return Ok(usize)
+    } 
     match bw.safe_write(&kinan_grade.get_student_id()) {
         Ok(_) => { println!("Uh oh! Security breach"); },
         Err(e) => { println!("Successfully errored writing Kinan's grade: {:?}", e); }
-    } // this should panic
+    } 
 }
 
 // TODO: flush out the use case (with filter objects), try to bypass it
