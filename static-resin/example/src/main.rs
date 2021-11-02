@@ -1,7 +1,7 @@
 use std::fs::File;
 use std::io::{Write, Error};
 mod grade;
-use beaver::{policy, filter, ResinBufWriter};
+use beaver::{policy, filter, beaverio};
 
 fn main() {
     println!("Hello, world!");
@@ -19,16 +19,16 @@ fn main() {
         path: "src/".to_owned(),
     };
 
-    let mut bw = ResinBufWriter::ResinBufWriter::safe_create(f, filter::Context::File(ctxt));
+    let mut bw = beaverio::ResinBufWriter::safe_create(f, filter::Context::File(ctxt));
     
-    bw.safe_write(&malte_grade.get_student_id()); // this should return Ok(usize)
-    bw.safe_write(&kinan_grade.get_student_id()); // this should panic
+    match bw.safe_write(&malte_grade.get_student_id()) {
+        Ok(_) => { println!("Wrote Malte's grade successfully "); },
+        Err(e) => { println!("Uh oh {:?}", e); }
+    } // this should return Ok(usize)
+    match bw.safe_write(&kinan_grade.get_student_id()) {
+        Ok(_) => { println!("Uh oh! Security breach"); },
+        Err(e) => { println!("Successfully errored writing Kinan's grade: {:?}", e); }
+    } // this should panic
 }
 
-// TODO: think about how to get data out such that only filter object can do so
-                                   // one thought: force it to call export_check
-                                   // problem: how to get information from StringablePolicy in a protected way?
-// check rust access modifiers and what impact it has on the code. 
-
-// TODO: implement this so that it returns either an error::Error or an io::Error and not panic
 // TODO: flush out the use case (with filter objects), try to bypass it

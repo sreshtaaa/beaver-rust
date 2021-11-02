@@ -1,4 +1,6 @@
-use std::io::{BufWriter, Write, Error};
+use std::error::Error;
+use std::io;
+use std::io::{BufWriter, Write};
 
 use crate::policy;
 use crate::filter;
@@ -17,18 +19,15 @@ impl<W: Write> ResinBufWriter<W> {
         }
     }
     pub fn safe_write<A: policy::Policy + Clone>(&mut self, buf: &policy::PoliciedString<A>) 
-    -> Result<usize, Error> {
+    -> Result<usize, Box<Error>> {
         match buf.get_policy().export_check(&self.ctxt) {
             Ok(_) => {
-                return self.buf_writer.write(buf.to_string().as_bytes());
+                match self.buf_writer.write(buf.string.as_bytes()) {
+                    Ok(s) => { Ok(s) },
+                    Err(e) => { Err(Box::new(e)) }
+                }
             },
-            Err(pe) => { // TODO: implement this so that it returns either an error::Error or an io::Error and not panic
-                panic!("Policy check failed");
-            },
+            Err(pe) => { Err(Box::new(pe)) },
         }
     }
 }
-
-// problem: how to get information from StringablePolicy in a protected way?
-// check rust access modifiers and what impact it has on the code. 
-// factor out pieces from BEAVER library and things that come from app code.

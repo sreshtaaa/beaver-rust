@@ -8,4 +8,4 @@
 
 pub mod policy;
 pub mod filter;
-pub mod ResinBufWriter;
+pub mod beaverio;
