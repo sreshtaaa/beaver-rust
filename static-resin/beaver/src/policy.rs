@@ -28,6 +28,7 @@ impl error::Error for PolicyError {
 }
 
 // ------------------- LIBRARY POLICY STRUCTS --------------------------------------
+// could store a vector of policies
 pub struct MergePolicy {
     policy1: Box<dyn Policy>,
     policy2: Box<dyn Policy>,
@@ -52,15 +53,15 @@ impl Policy for MergePolicy {
         }
     }
 
-    fn merge(self, _other: Box<dyn Policy>) -> Result<Box<dyn Policy>, PolicyError> {
+    fn merge(self, _other: &Box<dyn Policy>) -> Result<Box<dyn Policy>, PolicyError> {
         Ok(Box::new(MergePolicy { 
             policy1: Box::new(self),
-            policy2: _other,
+            policy2: _other.clone(),
         }))
     }
 }
 
-
+// refactor code to Box<Policy> 
 pub struct PoliciedString<P : Policy> {
     pub(crate) string: String, 
     policy: P,
@@ -73,23 +74,18 @@ impl<P : Policy> PoliciedString<P> {
         }
     }
 
-    // this is wrong -- supposed to mutate!!
-    pub fn push_str(&mut self, string: &str) -> PoliciedString<P> {
-        PoliciedString {
-            string: self.string.vec.extend_from_slice(string.as_bytes()),
-            policy: self.policy,
-        }
+    pub fn push_str(&mut self, string: &str) {
+        self.string.vec.extend_from_slice(string.as_bytes())
     }
 
     // this is wrong -- supposed to mutate!!
     pub fn push_policy_str<O : Policy>(&mut self, policy_string: &PoliciedString<O>) 
-    -> Result<PoliciedString<P>, policy::PolicyError> {
-        match self.policy.merge(policy_string.policy) {
+    -> Result<(), policy::PolicyError> {
+        match self.policy.merge(&policy_string.policy) {
             Ok(p) => {
-                Ok(PoliciedString {
-                    string: self.string.vec.extend_from_slice(policy_string.string.as_bytes()),
-                    policy: *p,
-                })
+                self.string.vec.extend_from_slice(&policy_string.string.as_bytes())
+                self.policy = p;
+                return Ok(());
             },
             Err(pe) => { Err(pe) }
         }
