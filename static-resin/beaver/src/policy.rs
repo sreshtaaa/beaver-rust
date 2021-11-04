@@ -73,6 +73,7 @@ impl<P : Policy> PoliciedString<P> {
         }
     }
 
+    // this is wrong -- supposed to mutate!!
     pub fn push_str(&mut self, string: &str) -> PoliciedString<P> {
         PoliciedString {
             string: self.string.vec.extend_from_slice(string.as_bytes()),
@@ -80,6 +81,7 @@ impl<P : Policy> PoliciedString<P> {
         }
     }
 
+    // this is wrong -- supposed to mutate!!
     pub fn push_policy_str<O : Policy>(&mut self, policy_string: &PoliciedString<O>) 
     -> Result<PoliciedString<P>, policy::PolicyError> {
         match self.policy.merge(policy_string.policy) {
