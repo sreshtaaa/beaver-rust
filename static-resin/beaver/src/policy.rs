@@ -2,6 +2,8 @@ use std::fmt;
 use crate::filter;
 use std::error;
 use dyn_clone::DynClone;
+extern crate beaver_derive;
+use beaver_derive::Policied;
 
 // ------------------- MAIN POLICY TRAITS/STRUCTS ----------------------------------
 pub trait Policied {
@@ -65,7 +67,7 @@ impl Policy for MergePolicy {
     }
 }
 
-// refactor code to Box<Policy> 
+#[derive(Policied)]
 pub struct PoliciedString {
     pub(crate) string: String, 
     policy: Box<dyn Policy>,
@@ -96,10 +98,7 @@ impl PoliciedString {
     }
 } 
 
-impl Policied for PoliciedString {
-    fn get_policy(&self) -> &Box<dyn Policy> { &self.policy }
-}
-
+#[derive(Policied)]
 pub struct PoliciedNumber {
     pub(crate) number: i64,  
     policy: Box<dyn Policy>,
@@ -112,7 +111,3 @@ impl PoliciedNumber {
         }
     }
 } 
-
-impl Policied for PoliciedNumber {
-    fn get_policy(&self) -> &Box<dyn Policy> { &self.policy }
-}
