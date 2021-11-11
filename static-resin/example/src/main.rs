@@ -13,8 +13,8 @@ fn main() {
     };
 
     // make a protected grade object— see policy.rs for the impl of Policy on the grade
-    let malte_grade = grade::Grade::make("malte".to_string(), 85, gp_malte); 
-    let kinan_grade = grade::Grade::make("kinan".to_string(), 87, gp_kinan);
+    let malte_grade = grade::Grade::make("malte".to_string(), 85, Box::new(gp_malte)); 
+    let kinan_grade = grade::Grade::make("kinan".to_string(), 87, Box::new(gp_kinan));
 
     // try and write to a file
     let f_malte = File::create("malte").expect("Unable to create file");

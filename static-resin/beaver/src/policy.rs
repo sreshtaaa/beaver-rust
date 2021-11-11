@@ -3,8 +3,8 @@ use crate::filter;
 use std::error;
 
 // ------------------- MAIN POLICY TRAITS/STRUCTS ----------------------------------
-pub trait Policied<P : Policy> {
-    fn get_policy(&self) -> Box<P>;
+pub trait Policied {
+    fn get_policy(&self) -> &Box<dyn Policy>;
 }
 
 pub trait Policy {
@@ -42,9 +42,9 @@ impl MergePolicy {
 
 impl Policy for MergePolicy {
     fn export_check(&self, ctxt: &filter::Context) -> Result<(), PolicyError> {
-        match *self.policy1.export_check(ctxt) {
+        match (*self.policy1).export_check(ctxt) {
             Ok(_) => {
-                match *self.policy2.export_check(ctxt) {
+                match (*self.policy2).export_check(ctxt) {
                     Ok(_) => { Ok(()) },
                     Err(pe) => { Err(pe) }
                 }
@@ -53,37 +53,36 @@ impl Policy for MergePolicy {
         }
     }
 
-    fn merge(self, _other: &Box<dyn Policy>) -> Result<Box<dyn Policy>, PolicyError> {
+    fn merge(self, _other: Box<dyn Policy>) -> Result<Box<dyn Policy>, PolicyError> {
         Ok(Box::new(MergePolicy { 
             policy1: Box::new(self),
-            policy2: _other.clone(),
+            policy2: _other,
         }))
     }
 }
 
 // refactor code to Box<Policy> 
-pub struct PoliciedString<P : Policy> {
+pub struct PoliciedString {
     pub(crate) string: String, 
-    policy: P,
+    policy: Box<dyn Policy>,
 }
 
-impl<P : Policy> PoliciedString<P> {
-    pub fn make(string: String, policy: P) -> PoliciedString<P> {
+impl PoliciedString {
+    pub fn make(string: String, policy: Box<dyn Policy>) -> PoliciedString {
         PoliciedString {
             string, policy
         }
     }
 
     pub fn push_str(&mut self, string: &str) {
-        self.string.vec.extend_from_slice(string.as_bytes())
+        self.string.push_str(string)
     }
 
-    // this is wrong -- supposed to mutate!!
-    pub fn push_policy_str<O : Policy>(&mut self, policy_string: &PoliciedString<O>) 
-    -> Result<(), policy::PolicyError> {
-        match self.policy.merge(&policy_string.policy) {
+    pub fn push_policy_str(&mut self, policy_string: PoliciedString) 
+    -> Result<(), PolicyError> {
+        match (self.policy).merge(policy_string.policy) {
             Ok(p) => {
-                self.string.vec.extend_from_slice(&policy_string.string.as_bytes())
+                self.string.push_str(&policy_string.string);
                 self.policy = p;
                 return Ok(());
             },
@@ -93,23 +92,23 @@ impl<P : Policy> PoliciedString<P> {
     }
 } 
 
-impl<P : Policy + Clone> Policied<P> for PoliciedString<P> {
-    fn get_policy(&self) -> Box<P> { Box::new(self.policy.clone()) }
+impl Policied for PoliciedString {
+    fn get_policy(&self) -> &Box<dyn Policy> { &self.policy }
 }
 
-pub struct PoliciedNumber<P : Policy> {
+pub struct PoliciedNumber {
     pub(crate) number: i64,  
-    policy: P,
+    policy: Box<dyn Policy>,
 }
 
-impl<P : Policy> PoliciedNumber<P> {
-    pub fn make(number: i64, policy: P) -> PoliciedNumber<P> {
+impl PoliciedNumber {
+    pub fn make(number: i64, policy: Box<dyn Policy>) -> PoliciedNumber {
         PoliciedNumber {
             number, policy
         }
     }
 } 
 
-impl<P : Policy + Clone> Policied<P> for PoliciedNumber<P> {
-    fn get_policy(&self) -> Box<P> { Box::new(self.policy.clone()) }
+impl Policied for PoliciedNumber {
+    fn get_policy(&self) -> &Box<dyn Policy> { &self.policy }
 }
