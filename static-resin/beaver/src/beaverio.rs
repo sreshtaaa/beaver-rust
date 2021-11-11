@@ -18,7 +18,7 @@ impl<W: Write> BeaverBufWriter<W> {
             ctxt: context,
         }
     }
-    pub fn safe_write<A: policy::Policy + Clone>(&mut self, buf: &policy::PoliciedString<A>) 
+    pub fn safe_write(&mut self, buf: &policy::PoliciedString) 
     -> Result<usize, Box<dyn Error>> {
         match buf.get_policy().export_check(&self.ctxt) {
             Ok(_) => {

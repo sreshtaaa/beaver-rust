@@ -26,48 +26,48 @@ impl policy::Policy for GradePolicy {
              },
         }
      }
-     fn merge(self, _other: Box<dyn Policy>) ->  Result<Box<dyn policy::Policy>, policy::PolicyError>{
-        Ok(Box::new(MergePolicy { 
-            policy1: Box::new(self),
-            policy2: Box::new(_other),
-        }))
+     fn merge(&self, other: &Box<dyn Policy>) ->  Result<Box<dyn policy::Policy>, policy::PolicyError>{
+        Ok(Box::new(policy::MergePolicy::make( 
+            Box::new(self.clone()),
+            other.clone(),
+        )))
      }
 }
 
 pub struct Grade {
     student_id: String, 
     grade: i64, 
-    policy: GradePolicy,
+    policy: Box<dyn Policy>,
 }
 
 // TODO: optimize clone() away
 // can be hidden away
-impl policy::Policied<GradePolicy> for Grade {
-    fn get_policy(&self) -> Box<GradePolicy> { 
-        Box::new(self.policy.clone())
+impl policy::Policied for Grade {
+    fn get_policy(&self) -> &Box<dyn Policy> { 
+        &self.policy
     }
 }
 
 impl Grade {
-    pub fn make(student_id: String, grade: i64, policy: GradePolicy) -> Grade {
+    pub fn make(student_id: String, grade: i64, policy: Box<GradePolicy>) -> Grade {
         Grade {
             student_id, grade, policy
         }
     }
 
     // can be hidden away
-    pub fn get_student_id(&self) -> Box<policy::PoliciedString<GradePolicy>> {
-        return Box::new(policy::PoliciedString::make(
+    pub fn get_student_id(&self) -> policy::PoliciedString {
+        return policy::PoliciedString::make(
             self.student_id.clone(),
             self.policy.clone()
-        ));
+        );
     }
 
     // can be hidden away
-    pub fn get_grade(&self) -> Box<policy::PoliciedNumber<GradePolicy>> {
-        return Box::new(policy::PoliciedNumber::make(
+    pub fn get_grade(&self) -> policy::PoliciedNumber {
+        return policy::PoliciedNumber::make(
             self.grade,
             self.policy.clone()
-        ));
+        );
     }
 }
