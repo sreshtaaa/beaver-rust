@@ -1,5 +1,5 @@
 use beaver::{policy, filter};
-use beaver::policy::{Policy, Policied, PolicyError};
+use beaver::policy::{Policy, Policied, PolicyError, NonePolicy};
 extern crate beaver_derive;
 use beaver_derive::Policied;
 

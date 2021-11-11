@@ -15,6 +15,7 @@ pub fn policied_derive(input: TokenStream) -> TokenStream {
   let expanded = quote! {
     impl Policied for #name {
       fn get_policy(&self) -> &Box<dyn Policy> { &self.policy }
+      fn remove_policy(&mut self) -> () { self.policy = Box::new(NonePolicy); }
     }
   };
 

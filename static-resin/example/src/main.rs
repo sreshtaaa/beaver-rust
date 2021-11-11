@@ -49,8 +49,9 @@ fn main() {
         file_name: "livia".to_owned(), 
         path: "src/".to_owned(),
     };
+    
     let mut bw_livia = beaverio::BeaverBufWriter::safe_create(f_livia, filter::Context::File(ctxt_livia));
-    match bw_livia.safe_write(&malte_and_kinan_student_id) {
+    match bw_livia.safe_write(&malte_student_id) {
         Ok(s) => { println!("Wrote Malte + Kinan's grade successfully with size: {:?}", s); },
         Err(e) => { println!("Uh oh {:?}", e); }
     } 

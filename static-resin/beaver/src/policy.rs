@@ -6,11 +6,22 @@ extern crate beaver_derive;
 use beaver_derive::Policied;
 
 // ------------------- MAIN POLICY TRAITS/STRUCTS ----------------------------------
-pub(crate) struct NonePolicy;
+#[derive(Clone)]
+pub struct NonePolicy; // should NonePolicy be pub? (should people be allowed to set Policies to NonePolicy)
+
+impl Policy for NonePolicy {
+    fn export_check(&self, ctxt: &filter::Context) -> Result<(), PolicyError> {
+        Ok(())
+    }
+
+    fn merge(&self, other: &Box<dyn Policy>) -> Result<Box<dyn Policy>, PolicyError> {
+        Ok(other.clone())
+    }
+}
 
 pub trait Policied {
     fn get_policy(&self) -> &Box<dyn Policy>;
-    fn remove(&mut self) -> ()// this assumes that the policy is named policy... is that ok?
+    fn remove_policy(&mut self) -> (); // this assumes that the policy is named policy... is that ok?
 }
 
 pub trait Policy : DynClone {
