@@ -38,8 +38,8 @@ fn main() {
     } 
     
     // try to merge policies
-    let malte_and_kinan_student_id = malte_student_id.push_policy_str(&kinan_student_id);
-    match bw_malte.safe_write(&malte_and_kinan_student_id) {
+    malte_student_id.push_policy_str(kinan_student_id);
+    match bw_malte.safe_write(&malte_student_id) {
         Ok(_) => { println!("Uh oh! Security breach!"); },
         Err(e) => { println!("Successfully errored writing Malte's + Kinan's grade: {:?}", e); }
     } 
@@ -50,7 +50,7 @@ fn main() {
         path: "src/".to_owned(),
     };
     let mut bw_livia = beaverio::ResinBufWriter::safe_create(f_livia, filter::Context::File(ctxt_livia));
-    match bw_livia.safe_write(&malte_and_kinan_student_id) {
+    match bw_livia.safe_write(&malte_student_id) {
         Ok(s) => { println!("Wrote Malte + Kinan's grade successfully with size: {:?}", s); },
         Err(e) => { println!("Uh oh {:?}", e); }
     } 

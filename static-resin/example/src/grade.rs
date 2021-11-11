@@ -1,5 +1,6 @@
 use beaver::{policy, filter};
 use beaver::policy::Policy;
+use dyn_clone;
 
 #[derive(Clone)]
 pub struct GradePolicy { 
@@ -26,10 +27,10 @@ impl policy::Policy for GradePolicy {
              },
         }
      }
-     fn merge(self, _other: Box<dyn policy::Policy>) ->  Result<Box<dyn policy::Policy>, policy::PolicyError>{
-        Ok(Box::new(MergePolicy { 
-            policy1: Box::new(self),
-            policy2: Box::new(_other),
+     fn merge(&self: Box<Self>, &other: Box<dyn policy::Policy>) ->  Result<Box<dyn policy::Policy>, policy::PolicyError>{
+        Ok(Box::new(policy::MergePolicy { 
+            policy1: self,
+            policy2: other,
         }))
      }
 }
@@ -37,13 +38,13 @@ impl policy::Policy for GradePolicy {
 pub struct Grade {
     student_id: String, 
     grade: i64, 
-    policy: Box<GradePolicy>,
+    policy: Box<dyn Policy>,
 }
 
 // TODO: optimize clone() away
 // can be hidden away
-impl policy::Policied<GradePolicy> for Grade {
-    fn get_policy(&self) -> &Box<GradePolicy> { 
+impl policy::Policied for Grade {
+    fn get_policy(&self) -> &Box<dyn Policy> { 
         &self.policy
     }
 }
@@ -56,18 +57,18 @@ impl Grade {
     }
 
     // can be hidden away
-    pub fn get_student_id(&self) -> Box<policy::PoliciedString<GradePolicy>> {
-        return Box::new(policy::PoliciedString::make(
+    pub fn get_student_id(&self) -> policy::PoliciedString {
+        return policy::PoliciedString::make(
             self.student_id.clone(),
-            Box::new(*self.policy.clone())
-        ));
+            dyn_clone::clone_box(&*self.policy)
+        );
     }
 
     // can be hidden away
-    pub fn get_grade(&self) -> Box<policy::PoliciedNumber<GradePolicy>> {
-        return Box::new(policy::PoliciedNumber::make(
+    pub fn get_grade(&self) -> policy::PoliciedNumber {
+        return policy::PoliciedNumber::make(
             self.grade,
-            Box::new(*self.policy.clone())
-        ));
+            dyn_clone::clone_box(&*self.policy)
+        );
     }
 }

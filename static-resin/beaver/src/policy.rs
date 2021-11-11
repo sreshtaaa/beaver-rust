@@ -1,16 +1,19 @@
 use std::fmt;
 use crate::filter;
 use std::error;
+use dyn_clone::DynClone;
 
 // ------------------- MAIN POLICY TRAITS/STRUCTS ----------------------------------
 pub trait Policied {
     fn get_policy(&self) -> &Box<dyn Policy>;
 }
 
-pub trait Policy {
+pub trait Policy : DynClone {
     fn export_check(&self, ctxt: &filter::Context) -> Result<(), PolicyError>; 
-    fn merge(self, _other: Box<dyn Policy>) -> Result<Box<dyn Policy>, PolicyError>;
+    fn merge(self: Box<Self>, _other: Box<dyn Policy>) -> Result<Box<dyn Policy>, PolicyError>;
 }
+
+dyn_clone::clone_trait_object!(Policy);
 
 #[derive(Debug, Clone)]
 pub struct PolicyError { pub message: String }
@@ -29,6 +32,7 @@ impl error::Error for PolicyError {
 
 // ------------------- LIBRARY POLICY STRUCTS --------------------------------------
 // could store a vector of policies
+#[derive(Clone)]
 pub struct MergePolicy {
     policy1: Box<dyn Policy>,
     policy2: Box<dyn Policy>,
@@ -42,7 +46,7 @@ impl MergePolicy {
 
 impl Policy for MergePolicy {
     fn export_check(&self, ctxt: &filter::Context) -> Result<(), PolicyError> {
-        match (*self.policy1).export_check(ctxt) {
+        match self.policy1.export_check(ctxt) {
             Ok(_) => {
                 match (*self.policy2).export_check(ctxt) {
                     Ok(_) => { Ok(()) },
@@ -53,9 +57,9 @@ impl Policy for MergePolicy {
         }
     }
 
-    fn merge(self, _other: Box<dyn Policy>) -> Result<Box<dyn Policy>, PolicyError> {
+    fn merge(self: Box<Self>, _other: Box<dyn Policy>) -> Result<Box<dyn Policy>, PolicyError> {
         Ok(Box::new(MergePolicy { 
-            policy1: Box::new(self),
+            policy1: self,
             policy2: _other,
         }))
     }
@@ -78,7 +82,7 @@ impl PoliciedString {
         self.string.push_str(string)
     }
 
-    pub fn push_policy_str(&mut self, policy_string: PoliciedString) 
+    pub fn push_policy_str(mut self, policy_string: PoliciedString) 
     -> Result<(), PolicyError> {
         match (self.policy).merge(policy_string.policy) {
             Ok(p) => {

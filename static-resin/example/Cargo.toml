@@ -7,3 +7,4 @@ edition = "2018"
 
 [dependencies]
 beaver = { path = "../beaver" }
+dyn-clone = "1.0.4"
