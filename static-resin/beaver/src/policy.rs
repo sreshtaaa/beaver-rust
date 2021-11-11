@@ -3,8 +3,13 @@ use crate::filter;
 use std::error;
 
 // ------------------- MAIN POLICY TRAITS/STRUCTS ----------------------------------
-pub trait Policied<P : Policy> {
-    fn get_policy(&self) -> Box<P>;
+pub(crate) struct NonePolicy;
+
+pub trait Policied {
+    fn get_policy(&self) -> Box<dyn Policy>;
+    fn remove(&mut self) -> () {
+        self.policy = NonePolicy; // this assumes that the policy is named policy... is that ok?
+    }
 }
 
 pub trait Policy {

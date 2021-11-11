@@ -23,7 +23,7 @@ fn main() {
         path: "src/".to_owned(),
     };
 
-    let mut bw_malte = beaverio::ResinBufWriter::safe_create(f_malte, filter::Context::File(ctxt_malte));
+    let mut bw_malte = beaverio::BeaverBufWriter::safe_create(f_malte, filter::Context::File(ctxt_malte));
 
     let malte_student_id = malte_grade.get_student_id();
     let kinan_student_id = kinan_grade.get_student_id();
@@ -49,7 +49,7 @@ fn main() {
         file_name: "livia".to_owned(), 
         path: "src/".to_owned(),
     };
-    let mut bw_livia = beaverio::ResinBufWriter::safe_create(f_livia, filter::Context::File(ctxt_livia));
+    let mut bw_livia = beaverio::BeaverBufWriter::safe_create(f_livia, filter::Context::File(ctxt_livia));
     match bw_livia.safe_write(&malte_and_kinan_student_id) {
         Ok(s) => { println!("Wrote Malte + Kinan's grade successfully with size: {:?}", s); },
         Err(e) => { println!("Uh oh {:?}", e); }
