@@ -8,9 +8,7 @@ pub(crate) struct NonePolicy;
 
 pub trait Policied {
     fn get_policy(&self) -> &Box<dyn Policy>;
-    fn remove(&mut self) -> () {
-        self.policy = NonePolicy; // this assumes that the policy is named policy... is that ok?
-    }
+    fn remove(&mut self) -> ()// this assumes that the policy is named policy... is that ok?
 }
 
 pub trait Policy : DynClone {
