@@ -1,5 +1,7 @@
 use beaver::{policy, filter};
-use beaver::policy::Policy;
+use beaver::policy::{Policy, Policied, PolicyError};
+extern crate beaver_derive;
+use beaver_derive::Policied;
 
 #[derive(Clone)]
 pub struct GradePolicy { 
@@ -7,26 +9,26 @@ pub struct GradePolicy {
     pub instructor_id: String
 }
 
-impl policy::Policy for GradePolicy {
-    fn export_check(&self, ctxt: &filter::Context) -> Result<(), policy::PolicyError> {
+impl Policy for GradePolicy {
+    fn export_check(&self, ctxt: &filter::Context) -> Result<(), PolicyError> {
         match ctxt {
              filter::Context::File(fc) => {
                  // pretend student_id is the filename
                  if fc.file_name.eq(&self.student_id) || fc.file_name.eq(&self.instructor_id) {
                      return Ok(());
                  } else {
-                     return Err(policy::PolicyError { message: "File must belong to same student".to_string() })
+                     return Err(PolicyError { message: "File must belong to same student".to_string() })
                  }
              },
              filter::Context::ClientNetwork(_) => { 
-                return Err(policy::PolicyError { message: "Cannot send grade over network".to_string() });
+                return Err(PolicyError { message: "Cannot send grade over network".to_string() });
              },
              filter::Context::ServerNetwork(_) => { 
-                 return Err(policy::PolicyError { message: "Cannot send grade over network".to_string() });
+                 return Err(PolicyError { message: "Cannot send grade over network".to_string() });
              },
         }
      }
-     fn merge(&self, other: &Box<dyn Policy>) ->  Result<Box<dyn policy::Policy>, policy::PolicyError>{
+     fn merge(&self, other: &Box<dyn Policy>) ->  Result<Box<dyn Policy>, PolicyError>{
         Ok(Box::new(policy::MergePolicy::make( 
             Box::new(self.clone()),
             other.clone(),
@@ -34,18 +36,11 @@ impl policy::Policy for GradePolicy {
      }
 }
 
+#[derive(Policied)]
 pub struct Grade {
     student_id: String, 
     grade: i64, 
     policy: Box<dyn Policy>,
-}
-
-// TODO: optimize clone() away
-// can be hidden away
-impl policy::Policied for Grade {
-    fn get_policy(&self) -> &Box<dyn Policy> { 
-        &self.policy
-    }
 }
 
 impl Grade {
