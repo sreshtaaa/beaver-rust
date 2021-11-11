@@ -1,6 +1,5 @@
 use beaver::{policy, filter};
 use beaver::policy::Policy;
-use dyn_clone;
 
 #[derive(Clone)]
 pub struct GradePolicy { 
@@ -27,11 +26,11 @@ impl policy::Policy for GradePolicy {
              },
         }
      }
-     fn merge(&self: Box<Self>, &other: Box<dyn policy::Policy>) ->  Result<Box<dyn policy::Policy>, policy::PolicyError>{
-        Ok(Box::new(policy::MergePolicy { 
-            policy1: self,
-            policy2: other,
-        }))
+     fn merge(&self, other: &Box<dyn Policy>) ->  Result<Box<dyn policy::Policy>, policy::PolicyError>{
+        Ok(Box::new(policy::MergePolicy::make( 
+            Box::new(self.clone()),
+            other.clone(),
+        )))
      }
 }
 
@@ -60,7 +59,7 @@ impl Grade {
     pub fn get_student_id(&self) -> policy::PoliciedString {
         return policy::PoliciedString::make(
             self.student_id.clone(),
-            dyn_clone::clone_box(&*self.policy)
+            self.policy.clone()
         );
     }
 
@@ -68,7 +67,7 @@ impl Grade {
     pub fn get_grade(&self) -> policy::PoliciedNumber {
         return policy::PoliciedNumber::make(
             self.grade,
-            dyn_clone::clone_box(&*self.policy)
+            self.policy.clone()
         );
     }
 }

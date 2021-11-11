@@ -25,8 +25,8 @@ fn main() {
 
     let mut bw_malte = beaverio::ResinBufWriter::safe_create(f_malte, filter::Context::File(ctxt_malte));
 
-    let malte_student_id = malte_grade.get_student_id();
-    let kinan_student_id = kinan_grade.get_student_id();
+    let mut malte_student_id = malte_grade.get_student_id();
+    let mut kinan_student_id = kinan_grade.get_student_id();
 
     match bw_malte.safe_write(&malte_student_id) {
         Ok(s) => { println!("Wrote Malte's grade successfully with size: {:?}", s); },
@@ -38,7 +38,7 @@ fn main() {
     } 
     
     // try to merge policies
-    malte_student_id.push_policy_str(kinan_student_id);
+    malte_student_id.push_policy_str(&kinan_student_id);
     match bw_malte.safe_write(&malte_student_id) {
         Ok(_) => { println!("Uh oh! Security breach!"); },
         Err(e) => { println!("Successfully errored writing Malte's + Kinan's grade: {:?}", e); }

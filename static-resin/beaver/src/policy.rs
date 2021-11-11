@@ -10,7 +10,7 @@ pub trait Policied {
 
 pub trait Policy : DynClone {
     fn export_check(&self, ctxt: &filter::Context) -> Result<(), PolicyError>; 
-    fn merge(self: Box<Self>, _other: Box<dyn Policy>) -> Result<Box<dyn Policy>, PolicyError>;
+    fn merge(&self, _other: &Box<dyn Policy>) -> Result<Box<dyn Policy>, PolicyError>;
 }
 
 dyn_clone::clone_trait_object!(Policy);
@@ -57,10 +57,10 @@ impl Policy for MergePolicy {
         }
     }
 
-    fn merge(self: Box<Self>, _other: Box<dyn Policy>) -> Result<Box<dyn Policy>, PolicyError> {
+    fn merge(&self, other: &Box<dyn Policy>) -> Result<Box<dyn Policy>, PolicyError> {
         Ok(Box::new(MergePolicy { 
-            policy1: self,
-            policy2: _other,
+            policy1: Box::new(self.clone()),
+            policy2: other.clone(),
         }))
     }
 }
@@ -82,9 +82,9 @@ impl PoliciedString {
         self.string.push_str(string)
     }
 
-    pub fn push_policy_str(mut self, policy_string: PoliciedString) 
+    pub fn push_policy_str(&mut self, policy_string: &PoliciedString) 
     -> Result<(), PolicyError> {
-        match (self.policy).merge(policy_string.policy) {
+        match (*(self.policy)).merge(&(policy_string.policy)) {
             Ok(p) => {
                 self.string.push_str(&policy_string.string);
                 self.policy = p;
