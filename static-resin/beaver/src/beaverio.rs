@@ -6,14 +6,14 @@ use crate::policy;
 use crate::filter;
 use crate::policy::Policied;
 
-pub struct ResinBufWriter<W: Write> {
+pub struct BeaverBufWriter<W: Write> {
     buf_writer: BufWriter<W>,
     ctxt: filter::Context,
 }
 
-impl<W: Write> ResinBufWriter<W> {
-    pub fn safe_create(inner: W, context: filter::Context) -> ResinBufWriter<W> {
-        ResinBufWriter {
+impl<W: Write> BeaverBufWriter<W> {
+    pub fn safe_create(inner: W, context: filter::Context) -> BeaverBufWriter<W> {
+        BeaverBufWriter {
             buf_writer: BufWriter::new(inner), 
             ctxt: context,
         }
