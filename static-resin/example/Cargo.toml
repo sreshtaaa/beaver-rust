@@ -8,3 +8,6 @@ edition = "2018"
 [dependencies]
 beaver-derive = { path = "../beaver-derive" }
 beaver = { path = "../beaver" }
+serde = { version = "1.0", features = ["derive"] }
+erased-serde = "0.3"
+serde_derive = "1.0.123"

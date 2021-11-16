@@ -3,7 +3,7 @@ use beaver::policy::{Policy, Policied, PolicyError, NonePolicy};
 extern crate beaver_derive;
 use beaver_derive::Policied;
 
-#[derive(Clone)]
+#[derive(Clone, Serialize)]
 pub struct GradePolicy { 
     pub student_id: String,
     pub instructor_id: String
@@ -36,7 +36,7 @@ impl Policy for GradePolicy {
      }
 }
 
-#[derive(Policied)]
+#[derive(Policied, Serialize)]
 pub struct Grade {
     student_id: String, 
     grade: i64, 
@@ -44,7 +44,7 @@ pub struct Grade {
 }
 
 impl Grade {
-    pub fn make(student_id: String, grade: i64, policy: Box<GradePolicy>) -> Grade {
+    pub fn make(student_id: String, grade: i64, policy: Box<dyn Policy>) -> Grade {
         Grade {
             student_id, grade, policy
         }
