@@ -6,30 +6,17 @@ extern crate beaver_derive;
 use beaver_derive::Policied;
 
 // ------------------- MAIN POLICY TRAITS/STRUCTS ----------------------------------
-#[derive(Clone)]
-pub struct NonePolicy; // should NonePolicy be pub? (should people be allowed to set Policies to NonePolicy)
-
-impl Policy for NonePolicy {
-    fn export_check(&self, ctxt: &filter::Context) -> Result<(), PolicyError> {
-        Ok(())
-    }
-
-    fn merge(&self, other: &Box<dyn Policy>) -> Result<Box<dyn Policy>, PolicyError> {
-        Ok(other.clone())
-    }
-}
-
-pub trait Policied {
-    fn get_policy(&self) -> &Box<dyn Policy>;
-    fn remove_policy(&mut self) -> (); // this assumes that the policy is named policy... is that ok?
-}
-
 pub trait Policy : DynClone {
     fn export_check(&self, ctxt: &filter::Context) -> Result<(), PolicyError>; 
     fn merge(&self, _other: &Box<dyn Policy>) -> Result<Box<dyn Policy>, PolicyError>;
 }
 
 dyn_clone::clone_trait_object!(Policy);
+
+pub trait Policied {
+    fn get_policy(&self) -> &Box<dyn Policy>;
+    fn remove_policy(&mut self) -> (); // this assumes that the policy is named policy... is that ok?
+}
 
 #[derive(Debug, Clone)]
 pub struct PolicyError { pub message: String }
@@ -47,6 +34,20 @@ impl error::Error for PolicyError {
 }
 
 // ------------------- LIBRARY POLICY STRUCTS --------------------------------------
+
+#[derive(Clone)]
+pub struct NonePolicy; // should NonePolicy be pub? (should people be allowed to set Policies to NonePolicy)
+
+impl Policy for NonePolicy {
+    fn export_check(&self, ctxt: &filter::Context) -> Result<(), PolicyError> {
+        Ok(())
+    }
+
+    fn merge(&self, other: &Box<dyn Policy>) -> Result<Box<dyn Policy>, PolicyError> {
+        Ok(other.clone())
+    }
+}
+
 // could store a vector of policies
 #[derive(Clone)]
 pub struct MergePolicy {
