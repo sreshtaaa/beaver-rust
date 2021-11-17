@@ -1,9 +1,9 @@
-use std::net;
+use std::net::{IpAddr};
 
 pub enum Context {
     File(FileContext),
-    ClientNetwork(ClientNetworkContext),
-    ServerNetwork(ServerNetworkContext),
+    ClientNetwork(RemoteConnectContext),
+    ServerNetwork(ListenConnectionsContext),
 }
 
 // infer from file object? 
@@ -12,10 +12,11 @@ pub struct FileContext {
     pub path: String,
 }
 
-pub struct ClientNetworkContext {
-    ip_address: std::net::IpAddr,
+pub struct RemoteConnectContext {
+    pub remote_ip_address: IpAddr,
+    pub port: u16,
 }
 
-pub struct ServerNetworkContext {
-    ip_address: std::net::IpAddr,
+pub struct ListenConnectionsContext {
+    ip_address: IpAddr,
 }
