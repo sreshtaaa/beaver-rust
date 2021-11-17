@@ -17,7 +17,7 @@ pub trait Policy : DynClone + erased_serde::Serialize {
 dyn_clone::clone_trait_object!(Policy);
 erased_serde::serialize_trait_object!(Policy);
 
-pub trait Policied : erased_serde::Serialize {
+pub trait Policied : erased_serde::Serialize { // why erased serde here? 
     fn get_policy(&self) -> &Box<dyn Policy>;
     fn remove_policy(&mut self) -> (); 
 }

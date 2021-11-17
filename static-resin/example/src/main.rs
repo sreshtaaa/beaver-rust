@@ -4,7 +4,7 @@ extern crate serde_derive;
 use std::fs::File;
 mod grade;
 use beaver::{filter, beaverio};
-use beaver::policy::{Policied, PoliciedString};
+use beaver::policy::Policied;
 
 fn main() {
     let gp_malte = grade::GradePolicy { 

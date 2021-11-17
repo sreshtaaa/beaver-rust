@@ -5,9 +5,8 @@ use std::io::{BufWriter, Write};
 use crate::policy;
 use crate::filter;
 use crate::policy::Policied;
-// use erased_serde::{Serialize, Serializer, Deserializer};
-extern crate serde;
-extern crate erased_serde;
+
+extern crate serde; // Why do we have to use normal serde here but erased_serde in policy.rs? 
 
 pub struct BeaverBufWriter<W: Write> {
     buf_writer: BufWriter<W>,
@@ -21,6 +20,7 @@ impl<W: Write> BeaverBufWriter<W> {
             ctxt: context,
         }
     }
+    
     pub fn safe_write<P: Policied + serde::Serialize>(&mut self, buf: &Box<P>)
     -> Result<usize, Box<dyn Error>> {
         match buf.get_policy().export_check(&self.ctxt) {
