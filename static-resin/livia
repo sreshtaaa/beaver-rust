@@ -1,1 +1,1 @@
-{"string":"maltekinan","policy":{"policy1":{"student_id":"malte","instructor_id":"livia"},"policy2":{"student_id":"kinan","instructor_id":"livia"}}}
+{"string":"maltekinan","policy":{"policy1":{"student_id":"malte","instructor_id":"livia","student_ip":null,"instructor_ip":"10.38.16.198"},"policy2":{"student_id":"kinan","instructor_id":"livia","student_ip":null,"instructor_ip":"10.38.16.198"}}}
