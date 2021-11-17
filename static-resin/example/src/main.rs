@@ -1,7 +1,10 @@
+#[macro_use]
+extern crate serde_derive;
+
 use std::fs::File;
 mod grade;
 use beaver::{filter, beaverio};
-use beaver::policy::Policied;
+use beaver::policy::{Policied, PoliciedString};
 
 fn main() {
     let gp_malte = grade::GradePolicy { 
@@ -34,8 +37,8 @@ fn main() {
 
     let mut bw_malte = beaverio::BeaverBufWriter::safe_create(f_malte, filter::Context::File(ctxt_malte));
 
-    let mut malte_student_id = malte_grade.get_student_id();
-    let mut kinan_student_id = kinan_grade.get_student_id();
+    let mut malte_student_id = Box::new(malte_grade.get_student_id());
+    let mut kinan_student_id = Box::new(kinan_grade.get_student_id());
 
     match bw_malte.safe_write(&malte_student_id) {
         Ok(s) => { println!("Wrote Malte's grade successfully with size: {:?}", s); },
@@ -50,7 +53,7 @@ fn main() {
         MERGE POLICIES
     **********************/
 
-    malte_student_id.push_policy_str(&kinan_student_id);
+    (*malte_student_id).push_policy_str(&kinan_student_id);
     match bw_malte.safe_write(&malte_student_id) {
         Ok(_) => { println!("Uh oh! Security breach!"); },
         Err(e) => { println!("Successfully errored writing Malte's + Kinan's grade: {:?}", e); }
@@ -71,7 +74,7 @@ fn main() {
     /*********************
         REMOVE POLICIES
     **********************/
-    let mut sreshtaa_student_id = sreshtaa_grade.get_student_id();
+    let sreshtaa_student_id = Box::new(sreshtaa_grade.get_student_id());
 
     match bw_malte.safe_write(&sreshtaa_student_id) {
         Ok(s) => { println!("Uh oh! {:?}", s); },
@@ -79,7 +82,7 @@ fn main() {
     }
 
     sreshtaa_grade.remove_policy();
-    let mut new_student_id = sreshtaa_grade.get_student_id();
+    let new_student_id = Box::new(sreshtaa_grade.get_student_id());
 
     match bw_malte.safe_write(&new_student_id) {
         Ok(s) => { println!("Able to write Sreshtaa's data to Malte's file with size: {:?}", s); },
