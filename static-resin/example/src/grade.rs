@@ -24,6 +24,8 @@ impl Policy for GradePolicy {
             },
             filter::Context::ClientNetwork(rcc) => { 
                 let self_ip = "127.0.0.1".to_string();
+
+                // Sample filter: only send data to trusted ip addresses
                 if opt_eq(&rcc.remote_ip_address.to_string(), &self.student_ip) || 
                     opt_eq(&rcc.remote_ip_address.to_string(), &self.instructor_ip) || 
                     rcc.remote_ip_address.to_string().eq(&self_ip)
