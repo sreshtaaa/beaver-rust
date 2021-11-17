@@ -32,7 +32,15 @@ impl<W: Write> BeaverBufWriter<W> {
                     Err(e) => { Err(Box::new(e)) }
                 }
             },
-            Err(pe) => { Err(Box::new(pe)) },
+            Err(pe) => { 
+                match &self.ctxt {
+                    filter::Context::ClientNetwork(_) => {
+                        self.buf_writer.write(format!("Beaver Error: {}", pe).as_bytes());
+                        Err(Box::new(pe))
+                    },
+                    _ => Err(Box::new(pe)),
+                }
+            }
         }
     }
 }
