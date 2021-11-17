@@ -38,8 +38,8 @@ impl Policy for GradePolicy {
 
 #[derive(Policied)]
 pub struct Grade {
-    student_id: String, 
-    grade: i64, 
+    #[policy_protected] student_id: String, 
+    #[policy_protected] grade: i64, 
     policy: Box<dyn Policy>,
 }
 
