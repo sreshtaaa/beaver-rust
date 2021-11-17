@@ -20,14 +20,16 @@ impl Policy for GradePolicy {
                      return Err(PolicyError { message: "File must belong to same student".to_string() })
                  }
              },
-             filter::Context::ClientNetwork(_) => { 
-                return Err(PolicyError { message: "Cannot send grade over network".to_string() });
+             filter::Context::ClientNetwork(rcc) => { 
+                return Ok(());
+                // Err(PolicyError { message: "Cannot send grade over network".to_string() });
              },
              filter::Context::ServerNetwork(_) => { 
                  return Err(PolicyError { message: "Cannot send grade over network".to_string() });
              },
         }
      }
+
      fn merge(&self, other: &Box<dyn Policy>) ->  Result<Box<dyn Policy>, PolicyError>{
         Ok(Box::new(policy::MergePolicy::make( 
             Box::new(self.clone()),

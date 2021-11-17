@@ -6,6 +6,8 @@ mod grade;
 use beaver::{filter, beaverio};
 use beaver::policy::Policied;
 
+use std::net;
+
 fn main() {
     let gp_malte = grade::GradePolicy { 
         student_id: "malte".to_string(),
@@ -93,6 +95,25 @@ fn main() {
 
     // malicious dev: try to change policy 
     // pub struct EmptyPolicy
+
+    /*************************
+        NETWORK CONNECTIONS
+    **************************/
+    let ip_addr = net::IpAddr::V4(net::Ipv4Addr::new(127, 0, 0, 1));
+    let client_ctxt_sreshtaa = filter::RemoteConnectContext {
+        remote_ip_address: ip_addr.clone(), 
+        port: 29290,
+    };
+
+    println!("Ip Address: {}, Port: {}", (&client_ctxt_sreshtaa).remote_ip_address, (&client_ctxt_sreshtaa).port);
+
+    let mut stream = net::TcpStream::connect(((&client_ctxt_sreshtaa).remote_ip_address, (&client_ctxt_sreshtaa).port)).unwrap();
+    let mut bw_tcp_sreshtaa = beaverio::BeaverBufWriter::safe_create(stream, filter::Context::ClientNetwork(client_ctxt_sreshtaa));
+
+    match bw_tcp_sreshtaa.safe_write(&sreshtaa_student_id) {
+        Ok(ip) => { println!("Sent Sreshtaa's grade to Ip Address: {:?}", ip); },
+        Err(e) => { println!("Uh oh! Could not send Sreshtaa's grade over the network: {:?}", e); }
+    }
 }
 
 // TODO: flush out the use case (with filter objects), try to bypass it
