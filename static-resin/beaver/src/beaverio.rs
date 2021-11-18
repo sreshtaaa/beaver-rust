@@ -27,7 +27,7 @@ impl<W: Write> BeaverBufWriter<W> {
     -> Result<usize, Box<dyn Error>> {
         match buf.get_policy().export_check(&self.ctxt) {
             Ok(_) => {
-                match self.buf_writer.write(serde_json::to_string(&*buf).unwrap().as_bytes()) {
+                match self.buf_writer.write(format!("{}\n", serde_json::to_string(&*buf).unwrap()).as_bytes()) {
                     Ok(s) => { Ok(s) },
                     Err(e) => { Err(Box::new(e)) }
                 }
@@ -35,7 +35,7 @@ impl<W: Write> BeaverBufWriter<W> {
             Err(pe) => { 
                 match &self.ctxt {
                     filter::Context::ClientNetwork(_) => {
-                        self.buf_writer.write(format!("Beaver Error: {}", pe).as_bytes());
+                        self.buf_writer.write(format!("Beaver Error: {}\n", pe).as_bytes());
                         Err(Box::new(pe))
                     },
                     _ => Err(Box::new(pe)),
