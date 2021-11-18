@@ -49,8 +49,8 @@ fn main() {
 
     let mut bw_malte = beaverio::BeaverBufWriter::safe_create(f_malte, filter::Context::File(ctxt_malte));
 
-    let mut malte_student_id = Box::new(malte_grade.get_student_id());
-    let mut kinan_student_id = Box::new(kinan_grade.get_student_id());
+    let mut malte_student_id = Box::new(malte_grade.student_id());
+    let mut kinan_student_id = Box::new(kinan_grade.student_id());
 
     match bw_malte.safe_write(&malte_student_id) {
         Ok(s) => { println!("Wrote Malte's grade successfully with size: {:?}", s); },

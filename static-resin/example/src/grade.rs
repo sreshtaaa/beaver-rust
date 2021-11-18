@@ -1,5 +1,5 @@
 use beaver::{policy, filter};
-use beaver::policy::{Policy, Policied, PolicyError, NonePolicy};
+use beaver::policy::{Policy, Policied, PolicyError, NonePolicy, PoliciedNumber, PoliciedString};
 extern crate beaver_derive;
 use beaver_derive::Policied;
 
@@ -59,8 +59,12 @@ fn opt_eq<T: std::cmp::PartialEq>(obj1: &T, obj2: &Option<T>) -> bool {
 
 #[derive(Policied, Serialize)]
 pub struct Grade {
+    #[policy_protected(PoliciedString)] 
     student_id: String, 
+
+    #[policy_protected(PoliciedNumber)] 
     grade: i64, 
+
     policy: Box<dyn Policy>,
 }
 
@@ -69,21 +73,5 @@ impl Grade {
         Grade {
             student_id, grade, policy
         }
-    }
-
-    // can be hidden away
-    pub fn get_student_id(&self) -> policy::PoliciedString {
-        return policy::PoliciedString::make(
-            self.student_id.clone(),
-            self.policy.clone()
-        );
-    }
-
-    // can be hidden away
-    pub fn get_grade(&self) -> policy::PoliciedNumber {
-        return policy::PoliciedNumber::make(
-            self.grade,
-            self.policy.clone()
-        );
     }
 }
