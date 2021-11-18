@@ -101,11 +101,6 @@ fn main() {
         Err(e) => { println!("Uh oh! {:?}", e); }
     }
 
-    // dev mistake: try to get student_id field out without policy
-
-    // malicious dev: try to change policy 
-    // pub struct EmptyPolicy
-
     /*************************
         NETWORK CONNECTIONS
     **************************/
