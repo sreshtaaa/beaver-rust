@@ -1,5 +1,4 @@
 extern crate proc_macro;
-use proc_macro2;
 extern crate syn;
 #[macro_use]
 extern crate quote;
@@ -30,24 +29,24 @@ pub fn policied_derive(input: TokenStream) -> TokenStream {
                       for attr in field.attrs.iter() {
                           // Parse the attribute
                           let meta = attr.parse_meta().unwrap();
-                          if meta.name().to_string() == "policy_protected" 
-                              {
-                                match meta {
-                                  syn::Meta::List(ml) => {
-                                    for nested_meta in ml.nested.iter() {
-                                      match nested_meta {
-                                        syn::NestedMeta::Meta(m) => {
-                                          // Save the protected elements
-                                          let attr = field.clone();
-                                          protected.push((attr.ident.unwrap(), m.clone().name()));
-                                        }
-                                        _ => (),
-                                      }
+                          if meta.name().to_string() == "policy_protected" {
+                            match meta {
+                              syn::Meta::List(inner_list) => {
+                                // Get nested return types #[policy_protected(...)]
+                                for ty in inner_list.nested.iter() {
+                                  match ty {
+                                    syn::NestedMeta::Meta(ty_meta) => {
+                                      // Save the protected elements
+                                      let attr = field.clone();
+                                      protected.push((attr.ident.unwrap(), ty_meta.clone().name()));
                                     }
+                                    _ => panic!("Inner list must be type, not string literal"),
                                   }
-                                  _ => (),
                                 }
                               }
+                              _ => panic!("Must have return type in inner list"),
+                            }
+                          }
                       }
                   }
               }
