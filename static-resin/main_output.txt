@@ -1,0 +1,9 @@
+Wrote Malte's grade successfully with size: 123
+Successfully errored writing Kinan's grade: PolicyError { message: "File must belong to same student" }
+Successfully errored writing Malte's + Kinan's grade: PolicyError { message: "File must belong to same student" }
+Wrote Malte + Kinan's grade successfully with size: 246
+Successfully prevented from writing Sreshtaa's ID to Malte's file: PolicyError { message: "File must belong to same student" }
+Able to write Sreshtaa's data to Malte's file with size: 35
+Sent Sreshtaa's grade to Ip Address: 127.0.0.1
+Successfully prevented sending Sreshtaa's grade to Ip Address 10.38.155.215: PolicyError { message: "Cannot send data to untrusted IP Address" }
+Sent Sreshtaa's grades to instructor's Ip Address: 10.38.16.198

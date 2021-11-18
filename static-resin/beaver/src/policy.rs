@@ -2,20 +2,28 @@ use std::fmt;
 use crate::filter;
 use std::error;
 use dyn_clone::DynClone;
+
 extern crate beaver_derive;
 use beaver_derive::Policied;
 
-// ------------------- MAIN POLICY TRAITS/STRUCTS ----------------------------------
-pub trait Policied {
-    fn get_policy(&self) -> &Box<dyn Policy>;
-}
+extern crate serde;
+extern crate erased_serde;
 
-pub trait Policy : DynClone {
+// ------------------- MAIN POLICY TRAITS/STRUCTS ----------------------------------
+pub trait Policy : DynClone + erased_serde::Serialize {
     fn export_check(&self, ctxt: &filter::Context) -> Result<(), PolicyError>; 
     fn merge(&self, _other: &Box<dyn Policy>) -> Result<Box<dyn Policy>, PolicyError>;
 }
 
 dyn_clone::clone_trait_object!(Policy);
+erased_serde::serialize_trait_object!(Policy);
+
+pub trait Policied : erased_serde::Serialize { // why erased serde here? 
+    fn get_policy(&self) -> &Box<dyn Policy>;
+    fn remove_policy(&mut self) -> (); 
+}
+
+erased_serde::serialize_trait_object!(Policied);
 
 #[derive(Debug, Clone)]
 pub struct PolicyError { pub message: String }
@@ -33,8 +41,22 @@ impl error::Error for PolicyError {
 }
 
 // ------------------- LIBRARY POLICY STRUCTS --------------------------------------
+
+#[derive(Clone, Serialize)]
+pub struct NonePolicy; // should NonePolicy be pub? (should people be allowed to set Policies to NonePolicy)
+
+impl Policy for NonePolicy {
+    fn export_check(&self, ctxt: &filter::Context) -> Result<(), PolicyError> {
+        Ok(())
+    }
+
+    fn merge(&self, other: &Box<dyn Policy>) -> Result<Box<dyn Policy>, PolicyError> {
+        Ok(other.clone())
+    }
+}
+
 // could store a vector of policies
-#[derive(Clone)]
+#[derive(Clone, Serialize)]
 pub struct MergePolicy {
     policy1: Box<dyn Policy>,
     policy2: Box<dyn Policy>,
@@ -67,7 +89,7 @@ impl Policy for MergePolicy {
     }
 }
 
-#[derive(Policied)]
+#[derive(Policied, Serialize)]
 pub struct PoliciedString {
     pub(crate) string: String, 
     policy: Box<dyn Policy>,
@@ -98,7 +120,7 @@ impl PoliciedString {
     }
 } 
 
-#[derive(Policied)]
+#[derive(Policied, Serialize)]
 pub struct PoliciedNumber {
     pub(crate) number: i64,  
     policy: Box<dyn Policy>,
