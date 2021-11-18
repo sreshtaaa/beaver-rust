@@ -18,6 +18,7 @@ dependencies = [
 name = "beaver-derive"
 version = "0.1.0"
 dependencies = [
+ "proc-macro2 1.0.32",
  "quote 0.6.13",
  "syn 0.15.44",
 ]

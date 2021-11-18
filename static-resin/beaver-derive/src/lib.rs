@@ -8,7 +8,6 @@ use proc_macro::TokenStream;
 
 #[proc_macro_derive(Policied, attributes(policy_protected))]
 pub fn policied_derive(input: TokenStream) -> TokenStream {
-  // println!("input {:#?}", input);
 
   let input = syn::parse_macro_input!(input as syn::DeriveInput);
 
@@ -73,7 +72,6 @@ pub fn policied_derive(input: TokenStream) -> TokenStream {
       }
     });
 
-  println!("expanded {:#?}", expanded_protected);
 
   let expanded_derive = quote! {
     impl Policied for #name {

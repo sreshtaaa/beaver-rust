@@ -86,7 +86,7 @@ fn main() {
     /*********************
         REMOVE POLICIES
     **********************/
-    let sreshtaa_student_id = Box::new(sreshtaa_grade.get_student_id());
+    let sreshtaa_student_id = Box::new(sreshtaa_grade.student_id());
 
     match bw_malte.safe_write(&sreshtaa_student_id) {
         Ok(s) => { println!("Uh oh! {:?}", s); },
@@ -94,7 +94,7 @@ fn main() {
     }
 
     sreshtaa_grade.remove_policy();
-    let new_student_id = Box::new(sreshtaa_grade.get_student_id());
+    let new_student_id = Box::new(sreshtaa_grade.student_id());
 
     match bw_malte.safe_write(&new_student_id) {
         Ok(s) => { println!("Able to write Sreshtaa's data to Malte's file with size: {:?}", s); },
