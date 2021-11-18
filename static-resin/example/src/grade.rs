@@ -1,5 +1,5 @@
 use beaver::{policy, filter};
-use beaver::policy::{Policy, Policied, PolicyError};
+use beaver::policy::{Policy, Policied, PolicyError, PoliciedNumber, PoliciedString};
 extern crate beaver_derive;
 use beaver_derive::Policied;
 
@@ -38,8 +38,12 @@ impl Policy for GradePolicy {
 
 #[derive(Policied)]
 pub struct Grade {
-    #[policy_protected] student_id: String, 
-    #[policy_protected] grade: i64, 
+    #[policy_protected(PoliciedString)] 
+    student_id: String, 
+
+    #[policy_protected(PoliciedNumber)] 
+    grade: i64, 
+
     policy: Box<dyn Policy>,
 }
 
@@ -48,21 +52,5 @@ impl Grade {
         Grade {
             student_id, grade, policy
         }
-    }
-
-    // can be hidden away
-    pub fn get_student_id(&self) -> policy::PoliciedString {
-        return policy::PoliciedString::make(
-            self.student_id.clone(),
-            self.policy.clone()
-        );
-    }
-
-    // can be hidden away
-    pub fn get_grade(&self) -> policy::PoliciedNumber {
-        return policy::PoliciedNumber::make(
-            self.grade,
-            self.policy.clone()
-        );
     }
 }
