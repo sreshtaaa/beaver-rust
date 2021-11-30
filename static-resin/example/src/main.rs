@@ -50,8 +50,8 @@ fn main() {
 
     let mut bw_malte = beaverio::BeaverBufWriter::safe_create(f_malte, filter::Context::File(ctxt_malte));
 
-    let mut malte_student_id = Box::new(malte_grade.get_student_id()); // Box<PoliciedString>
-    let mut kinan_student_id = Box::new(kinan_grade.get_student_id());
+    let mut malte_student_id = Box::new(malte_grade.student_id());
+    let mut kinan_student_id = Box::new(kinan_grade.student_id());
 
     match bw_malte.safe_write_serialized(&malte_student_id) {
         Ok(s) => { println!("Wrote Malte's grade successfully with size: {:?}", s); },
@@ -88,7 +88,7 @@ fn main() {
     /*********************
         REMOVE POLICIES
     **********************/
-    let sreshtaa_student_id = Box::new(sreshtaa_grade.get_student_id());
+    let sreshtaa_student_id = Box::new(sreshtaa_grade.student_id());
 
     match bw_malte.safe_write_serialized(&sreshtaa_student_id) {
         Ok(s) => { println!("Uh oh! {:?}", s); },
@@ -96,17 +96,12 @@ fn main() {
     }
 
     sreshtaa_grade.remove_policy();
-    let new_student_id = Box::new(sreshtaa_grade.get_student_id());
+    let new_student_id = Box::new(sreshtaa_grade.student_id());
 
     match bw_malte.safe_write_serialized(&new_student_id) {
         Ok(s) => { println!("Able to write Sreshtaa's data to Malte's file with size: {:?}", s); },
         Err(e) => { println!("Uh oh! {:?}", e); }
     }
-
-    // dev mistake: try to get student_id field out without policy
-
-    // malicious dev: try to change policy 
-    // pub struct EmptyPolicy
 
     /*************************
         NETWORK CONNECTIONS
