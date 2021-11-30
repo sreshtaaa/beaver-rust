@@ -26,7 +26,7 @@ impl<W: Write> BeaverBufWriter<W> {
     pub fn safe_write_serialized(&mut self, buf: &policy::PoliciedString) -> Result<usize, Box<dyn Error>> {
         match buf.get_policy().export_check(&self.ctxt) {
             Ok(_) => {
-                match self.buf_writer.write(buf.string.as_bytes()) {
+                match self.buf_writer.write(format!("{}\n", buf.string).as_bytes()) {
                     Ok(s) => { Ok(s) }, 
                     Err(e) => { Err(Box::new(e)) }
                 }
