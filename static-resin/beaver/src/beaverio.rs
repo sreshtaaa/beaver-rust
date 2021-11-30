@@ -1,6 +1,6 @@
 use std::error::Error;
 use std::io;
-use std::io::{BufWriter, Write};
+use std::io::{BufWriter, Write, BufReader, Read};
 
 use crate::policy;
 use crate::filter;
@@ -23,10 +23,22 @@ impl<W: Write> BeaverBufWriter<W> {
         }
     }
 
-    pub fn safe_write<P: Policied + serde::Serialize>(&mut self, buf: &Box<P>)
-    -> Result<usize, Box<dyn Error>> {
+    pub fn safe_write_serialized(&mut self, buf: &policy::PoliciedString) -> Result<usize, Box<dyn Error>> {
         match buf.get_policy().export_check(&self.ctxt) {
             Ok(_) => {
+                match self.buf_writer.write(buf.string.as_bytes()) {
+                    Ok(s) => { Ok(s) }, 
+                    Err(e) => { Err(Box::new(e)) }
+                }
+            }, 
+            Err(pe) => { Err(Box::new(pe)) }
+        }
+    }
+
+    pub fn safe_serialize_json<P: Policied + serde::Serialize>(&mut self, buf: &Box<P>)
+    -> Result<usize, Box<dyn Error>> {
+        match buf.get_policy().export_check(&self.ctxt) {
+            Ok(_) => { // TODO: Abstract into serializer and bufwriter separately
                 match self.buf_writer.write(format!("{}\n", serde_json::to_string(&*buf).unwrap()).as_bytes()) {
                     Ok(s) => { Ok(s) },
                     Err(e) => { Err(Box::new(e)) }
@@ -44,3 +56,23 @@ impl<W: Write> BeaverBufWriter<W> {
         }
     }
 }
+
+// pub struct BeaverBufReader<R: Read> {
+//     buf_reader: BufReader<R>,
+//     ctxt: filter::Context,
+// }
+
+// impl<R: Read> BeaverBufReader<R> {
+//     pub fn safe_create(inner: R, context: filter::Context) -> BeaverBufReader<R> {
+//         BeaverBufReader {
+//             buf_reader: BufReader::new(inner), 
+//             ctxt: context,
+//         }
+//     }
+
+//     pub fn safe_read<P: Policied + serde::Deserialize>(&mut self, buf: &mut Box<P>) -> ? {
+//         for line in self.buf_reader.lines() {
+
+//         }
+//     }
+// }
