@@ -45,7 +45,6 @@ fn main() {
     let ctxt_malte = filter::FileContext {
         file_name: "malte".to_owned(), 
         path: "src/".to_owned(),
-        permission: filter::Permission::ReadWrite,
     };
 
     let mut bw_malte = beaverio::BeaverBufWriter::safe_create(f_malte, filter::Context::File(ctxt_malte));
@@ -76,7 +75,6 @@ fn main() {
     let ctxt_livia = filter::FileContext {
         file_name: "livia".to_owned(), 
         path: "src/".to_owned(),
-        permission: filter::Permission::ReadWrite,
     };
 
     let mut bw_livia = beaverio::BeaverBufWriter::safe_create(f_livia, filter::Context::File(ctxt_livia));
