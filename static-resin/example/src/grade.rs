@@ -15,6 +15,12 @@ impl Policy for GradePolicy {
     fn export_check(&self, ctxt: &filter::Context) -> Result<(), PolicyError> {
         match ctxt {
             filter::Context::File(fc) => {
+                if fc.file_name.eq(&self.student_id) || fc.file_name.eq(&self.instructor_id) {
+                    return Ok(());
+                } else {
+                    return Err(PolicyError { message: "File must belong to same student".to_string() })
+                }
+                /*
                 match fc.permission {
                     filter::Permission::ReadOnly => Err(PolicyError { message: "Cannot write data with ReadOnly policy".to_string() }), 
                     _ =>  {  // pretend student_id is the filename
@@ -25,6 +31,7 @@ impl Policy for GradePolicy {
                         }
                     }, 
                 }
+                */
             },
             filter::Context::ClientNetwork(rcc) => { 
                 //let self_ip = "127.0.0.1".to_string();
