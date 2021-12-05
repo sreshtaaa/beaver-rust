@@ -118,6 +118,15 @@ impl PoliciedString {
         }
         
     }
+
+    pub fn export(self, ctxt: &filter::Context) -> Result<String, PolicyError> {
+        match self.get_policy().export_check(&ctxt) {
+            Ok(_) => {
+                Ok(self.string)
+            }, 
+            Err(pe) => { Err(pe) }
+        }
+    }
 } 
 
 #[derive(Policied, Serialize)]
