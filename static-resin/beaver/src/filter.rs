@@ -4,7 +4,10 @@ pub enum Context {
     File(FileContext),
     ClientNetwork(RemoteConnectContext),
     ServerNetwork(ListenConnectionsContext),
+    CustomContext(Box<dyn CustomContext>)
 }
+
+pub trait CustomContext {}
 
 // infer from file object? 
 pub struct FileContext {
