@@ -10,6 +10,11 @@ extern crate serde; // Why do we have to use normal serde here but erased_serde 
 
 use std::net;
 
+// TODO: Add just an export_check funciton that takes in: PoliciedString, Context, and returns the raw string
+// Rationale: We need to make Beaver be able to work with other libraries (such as lettre::Email)
+
+// pub fn raw_export_check()
+
 pub struct BeaverBufWriter<W: Write> {
     buf_writer: BufWriter<W>,
     ctxt: filter::Context,
@@ -57,6 +62,7 @@ impl<W: Write> BeaverBufWriter<W> {
     }
 
     // TODO: Add other safe serialize methods (xml, other formats)
+    // TODO: Writing context with data 
 }
 
 pub struct BeaverBufReader<R: Read> {
@@ -72,11 +78,19 @@ impl<R: Read> BeaverBufReader<R> {
         }
     }
 
-    pub fn safe_read_line(&mut self) -> String {
+    pub fn safe_read_raw_line(&mut self) -> String {
         let mut deserialized_string = String::new(); 
         self.buf_reader.read_line(&mut deserialized_string);
         deserialized_string
     }
+
+    /* pub fn safe_read_raw(&mut self) -> String {
+        let mut deserialized_string = String::new().as_bytes(); 
+        self.buf_reader.read(&mut deserialized_string);
+        deserialized_string.to_owned()
+    }
+    */
+
     /*
     pub fn safe_read<P: Policied + serde::Deserialize>(&mut self) -> ? {
         let mut deserialized_string = String::new();
@@ -85,4 +99,6 @@ impl<R: Read> BeaverBufReader<R> {
         }
     }
     */
+
+    // TODO: Implement with TypeTag
 }
