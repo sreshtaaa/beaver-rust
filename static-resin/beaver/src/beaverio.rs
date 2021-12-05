@@ -1,6 +1,6 @@
 use std::error::Error;
 use std::io;
-use std::io::{BufWriter, Write, BufReader, Read};
+use std::io::{BufWriter, Write, BufReader, Read, BufRead};
 
 use crate::policy;
 use crate::filter;
@@ -17,6 +17,10 @@ pub fn export(context: &filter::Context, s: &policy::PoliciedString) -> Result<S
         Err(pe) => { Err(Box::new(pe)) }
     }
 }
+// TODO: Add just an export_check funciton that takes in: PoliciedString, Context, and returns the raw string
+// Rationale: We need to make Beaver be able to work with other libraries (such as lettre::Email)
+
+// pub fn raw_export_check()
 
 pub struct BeaverBufWriter<W: Write> {
     buf_writer: BufWriter<W>,
@@ -63,24 +67,45 @@ impl<W: Write> BeaverBufWriter<W> {
             }
         }
     }
+
+    // TODO: Add other safe serialize methods (xml, other formats)
+    // TODO: Writing context with data 
 }
 
-// pub struct BeaverBufReader<R: Read> {
-//     buf_reader: BufReader<R>,
-//     ctxt: filter::Context,
-// }
+pub struct BeaverBufReader<R: Read> {
+    buf_reader: BufReader<R>,
+    ctxt: filter::Context,
+}
 
-// impl<R: Read> BeaverBufReader<R> {
-//     pub fn safe_create(inner: R, context: filter::Context) -> BeaverBufReader<R> {
-//         BeaverBufReader {
-//             buf_reader: BufReader::new(inner), 
-//             ctxt: context,
-//         }
-//     }
+impl<R: Read> BeaverBufReader<R> {
+    pub fn safe_create(inner: R, context: filter::Context) -> BeaverBufReader<R> {
+        BeaverBufReader {
+            buf_reader: BufReader::new(inner), 
+            ctxt: context,
+        }
+    }
 
-//     pub fn safe_read<P: Policied + serde::Deserialize>(&mut self, buf: &mut Box<P>) -> ? {
-//         for line in self.buf_reader.lines() {
+    pub fn safe_read_raw_line(&mut self) -> String {
+        let mut deserialized_string = String::new(); 
+        self.buf_reader.read_line(&mut deserialized_string);
+        deserialized_string
+    }
 
-//         }
-//     }
-// }
+    /* pub fn safe_read_raw(&mut self) -> String {
+        let mut deserialized_string = String::new().as_bytes(); 
+        self.buf_reader.read(&mut deserialized_string);
+        deserialized_string.to_owned()
+    }
+    */
+
+    /*
+    pub fn safe_read<P: Policied + serde::Deserialize>(&mut self) -> ? {
+        let mut deserialized_string = String::new();
+        for line in self.buf_reader.lines() {
+            
+        }
+    }
+    */
+
+    // TODO: Implement with TypeTag
+}
