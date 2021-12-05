@@ -1,4 +1,5 @@
 use std::net::{IpAddr};
+use std::any::Any;
 
 pub enum Context {
     File(FileContext),
@@ -7,7 +8,9 @@ pub enum Context {
     CustomContext(Box<dyn CustomContext>)
 }
 
-pub trait CustomContext {}
+pub trait CustomContext {
+    fn as_any(&self) -> &dyn Any;
+}
 
 // infer from file object? 
 pub struct FileContext {

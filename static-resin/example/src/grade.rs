@@ -50,6 +50,9 @@ impl Policy for GradePolicy {
             filter::Context::ServerNetwork(_) => { 
                 return Err(PolicyError { message: "Cannot send grade over network".to_string() });
             },
+            filter::Context::CustomContext(_) => { 
+                return Err(PolicyError { message: "Custom contexts not enabled for grades".to_string() });
+            },
         }
      }
 
