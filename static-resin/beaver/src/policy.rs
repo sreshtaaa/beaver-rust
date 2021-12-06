@@ -2,6 +2,7 @@ use std::fmt;
 use crate::filter;
 use std::error;
 use dyn_clone::DynClone;
+use std::borrow::ToOwned;
 
 extern crate beaver_derive;
 use beaver_derive::Policied;
@@ -46,7 +47,7 @@ impl error::Error for PolicyError {
 pub struct NonePolicy; // should NonePolicy be pub? (should people be allowed to set Policies to NonePolicy)
 
 impl Policy for NonePolicy {
-    fn export_check(&self, ctxt: &filter::Context) -> Result<(), PolicyError> {
+    fn export_check(&self, _ctxt: &filter::Context) -> Result<(), PolicyError> {
         Ok(())
     }
 
@@ -128,6 +129,16 @@ impl PoliciedString {
         }
     }
 } 
+
+impl ToOwned for PoliciedString {
+    type Owned = PoliciedString;
+    fn to_owned(&self) -> PoliciedString {
+        PoliciedString {
+            string: self.string.to_owned(),
+            policy: self.policy.clone(),
+        }
+    }
+}
 
 #[derive(Policied, Serialize)]
 pub struct PoliciedNumber {

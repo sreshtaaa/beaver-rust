@@ -1,5 +1,4 @@
 use std::error::Error;
-use std::io;
 use std::io::{BufWriter, Write, BufReader, Read, BufRead};
 
 use crate::policy;
@@ -8,8 +7,6 @@ use crate::policy::Policied;
 use crate::policy::PolicyError;
 
 extern crate serde; // Why do we have to use normal serde here but erased_serde in policy.rs? 
-
-use std::net;
 
 pub fn export(context: &filter::Context, s: &policy::PoliciedString) -> Result<String, Box<PolicyError>> {
     match s.get_policy().export_check(&context) {
