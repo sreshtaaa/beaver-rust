@@ -185,4 +185,13 @@ impl PoliciedNumber {
     }
 } 
 
+#[derive(Serialize)]
+pub struct PoliciedVec<T> {
+    inner: Vec<T>,
+    policy: Box<dyn Policy>,
+}
+
+// impl<T> Policied<Vec<T>> for PoliciedVec<T> {
+
+// }
 // Limitation: Cannot have policied containers
