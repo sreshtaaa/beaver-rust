@@ -15,6 +15,7 @@ pub fn policied_derive(input: TokenStream) -> TokenStream {
 
   // Find the name of members we need to duplicate
   let mut protected: Vec<(syn::Ident, syn::Ident)> = vec![];
+  let mut fields: Vec<(syn::Ident, syn::Type)> = vec![];
 
   match input.data {
       // Only process structs
@@ -48,6 +49,11 @@ pub fn policied_derive(input: TokenStream) -> TokenStream {
                             }
                           }
                       }
+                      let field_clone = field.clone();
+                      let field_name = field_clone.ident.unwrap().to_string();
+                      if !field_name.eq("policy") {
+                        fields.push((field.clone().ident.unwrap(), field.clone().ty))
+                      }
                   }
               }
 
@@ -61,21 +67,44 @@ pub fn policied_derive(input: TokenStream) -> TokenStream {
   }
 
   let expanded_protected = protected.iter().fold(
+  quote!(), |es, (name, ty)| quote! {
+    #es
+    pub fn #name(&self) -> #ty {
+      #ty::make(
+        self.#name.clone(),
+        self.policy.clone()
+      )
+    }
+  });
+
+  let expanded_fields = fields.iter().fold(
     quote!(), |es, (name, ty)| quote! {
       #es
-      pub fn #name(&self) -> #ty {
-        #ty::make(
-          self.#name.clone(),
-          self.policy.clone()
-        )
-      }
-    });
+      pub #name: #ty
+  });
 
+  let expanded_set_fields = fields.iter().fold(
+    quote!(), |es, (name, _)| quote! {
+      #es
+      #name: self.#name
+  });
+
+  let mut new_type = name.to_string().clone();
+  new_type.push_str("Unpolicied");
+  let new_name = syn::Ident::new(&new_type, name.span());
 
   let expanded_derive = quote! {
+    pub struct #new_name {
+      #expanded_fields
+    }
+
     impl Policied for #name {
       fn get_policy(&self) -> &Box<dyn Policy> { &self.policy }
-      fn remove_policy(&mut self) -> () { self.policy = Box::new(NonePolicy); }
+      fn remove_policy<#new_type>(self) -> #new_type { 
+        #new_name {
+          #expanded_set_fields
+        }
+      }
     }
 
     impl #name {

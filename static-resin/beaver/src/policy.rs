@@ -11,7 +11,7 @@ extern crate serde;
 extern crate erased_serde;
 
 // ------------------- MAIN POLICY TRAITS/STRUCTS ----------------------------------
-pub trait Policy : DynClone + erased_serde::Serialize {
+pub trait Policy: DynClone + erased_serde::Serialize {
     fn export_check(&self, ctxt: &filter::Context) -> Result<(), PolicyError>; 
     fn merge(&self, _other: &Box<dyn Policy>) -> Result<Box<dyn Policy>, PolicyError>;
 }
@@ -21,10 +21,10 @@ erased_serde::serialize_trait_object!(Policy);
 
 pub trait Policied : erased_serde::Serialize { // why erased serde here? 
     fn get_policy(&self) -> &Box<dyn Policy>;
-    fn remove_policy(&mut self) -> (); 
+    fn remove_policy<T>(self) -> T; 
 }
 
-erased_serde::serialize_trait_object!(Policied);
+// erased_serde::serialize_trait_object!(Policied);
 
 #[derive(Debug, Clone)]
 pub struct PolicyError { pub message: String }
@@ -155,3 +155,18 @@ impl PoliciedNumber {
 } 
 
 // Limitation: Cannot have policied containers
+pub struct PoliciedVec<T> {
+    vector: Vec<T>,
+    policy: Box<dyn Policy>,
+}
+
+impl<T> PoliciedVec<T> {
+    pub fn push_policy<PolicyT: Policied>(&mut self, value: PolicyT) {
+        let new_policy = self.policy.merge(value.get_policy());
+
+    }
+
+    pub fn push(&mut self, value: T) {
+    }
+}
+
