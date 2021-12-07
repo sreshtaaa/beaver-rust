@@ -33,9 +33,9 @@ fn main() {
     };
 
     // make a protected grade object— see policy.rs for the impl of Policy on the grade
-    let malte_grade = grade::Grade::make("malte".to_string(), 85, Box::new(gp_malte)); 
-    let kinan_grade = grade::Grade::make("kinan".to_string(), 87, Box::new(gp_kinan));
-    let mut sreshtaa_grade = grade::Grade::make("sreshtaa".to_string(), 82, Box::new(gp_sreshtaa));
+    let malte_grade = grade::PoliciedGrade::make("malte".to_string(), 85, Box::new(gp_malte)); 
+    let kinan_grade = grade::PoliciedGrade::make("kinan".to_string(), 87, Box::new(gp_kinan));
+    let mut sreshtaa_grade = grade::PoliciedGrade::make("sreshtaa".to_string(), 82, Box::new(gp_sreshtaa));
     
     /***********************
         TEST EXPORT CHECK

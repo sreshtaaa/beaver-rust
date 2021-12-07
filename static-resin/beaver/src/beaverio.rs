@@ -4,20 +4,13 @@ use std::io::{BufWriter, Write, BufReader, Read, BufRead};
 use crate::policy;
 use crate::filter;
 use crate::policy::Policied;
-use crate::policy::PolicyError;
 
 extern crate serde; // Why do we have to use normal serde here but erased_serde in policy.rs? 
 
-pub fn export(context: &filter::Context, s: &policy::PoliciedString) -> Result<String, Box<PolicyError>> {
-    match s.get_policy().export_check(&context) {
-        Ok(_) => { Ok(s.string.clone()) }, 
-        Err(pe) => { Err(Box::new(pe)) }
-    }
-}
-// TODO: Add just an export_check funciton that takes in: PoliciedString, Context, and returns the raw string
+// TODO: Add just an check funciton that takes in: PoliciedString, Context, and returns the raw string
 // Rationale: We need to make Beaver be able to work with other libraries (such as lettre::Email)
 
-// pub fn raw_export_check()
+// pub fn raw_check()
 
 pub struct BeaverBufWriter<W: Write> {
     buf_writer: BufWriter<W>,
@@ -33,10 +26,10 @@ impl<W: Write> BeaverBufWriter<W> {
     }
 
     pub fn safe_write_serialized(&mut self, buf: &policy::PoliciedString) -> Result<usize, Box<dyn Error>> {
-        match buf.get_policy().export_check(&self.ctxt) {
-            Ok(_) => {
-                match self.buf_writer.write(format!("{}\n", buf.string).as_bytes()) {
-                    Ok(s) => { Ok(s) }, 
+        match buf.export_check(&self.ctxt) {
+            Ok(s) => {
+                match self.buf_writer.write(format!("{}\n", s).as_bytes()) {
+                    Ok(us) => { Ok(us) }, 
                     Err(e) => { Err(Box::new(e)) }
                 }
             }, 
@@ -44,9 +37,9 @@ impl<W: Write> BeaverBufWriter<W> {
         }
     }
 
-    pub fn safe_serialize_json<P: Policied + serde::Serialize>(&mut self, buf: &Box<P>)
+    pub fn safe_serialize_json<T, P: Policied<T> + serde::Serialize>(&mut self, buf: &Box<P>)
     -> Result<usize, Box<dyn Error>> {
-        match buf.get_policy().export_check(&self.ctxt) {
+        match buf.get_policy().check(&self.ctxt) {
             Ok(_) => { // TODO: Abstract into serializer and bufwriter separately
                 match self.buf_writer.write(format!("{}\n", serde_json::to_string(&*buf).unwrap()).as_bytes()) {
                     Ok(s) => { Ok(s) },

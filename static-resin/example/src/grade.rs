@@ -12,7 +12,7 @@ pub struct GradePolicy {
 }
 
 impl Policy for GradePolicy {
-    fn export_check(&self, ctxt: &filter::Context) -> Result<(), PolicyError> {
+    fn check(&self, ctxt: &filter::Context) -> Result<(), PolicyError> {
         match ctxt {
             filter::Context::File(fc) => {
                 if fc.file_name.eq(&self.student_id) || fc.file_name.eq(&self.instructor_id) {
@@ -71,21 +71,57 @@ fn opt_eq<T: std::cmp::PartialEq>(obj1: &T, obj2: &Option<T>) -> bool {
     }
 }
 
-#[derive(Policied, Serialize)]
+//#[derive(Policied, Serialize)]
+#[derive(Serialize, Clone)]
 pub struct Grade {
-    #[policy_protected(PoliciedString)] 
-    student_id: String, 
+    //#[policy_protected(PoliciedString)] 
+    pub student_id: String, 
 
-    #[policy_protected(PoliciedNumber)] 
-    grade: i64, 
+    //#[policy_protected(PoliciedNumber)] 
+    pub grade: i64, 
+}
 
+#[derive(Serialize)]
+pub struct PoliciedGrade {
+    inner: Grade,
     policy: Box<dyn Policy>,
 }
 
-impl Grade {
-    pub fn make(student_id: String, grade: i64, policy: Box<dyn Policy>) -> Grade {
-        Grade {
-            student_id, grade, policy
+impl Policied<Grade> for PoliciedGrade {
+    fn get_policy(&self) -> &Box<dyn Policy> {
+        &self.policy
+    }
+
+    fn remove_policy(&mut self) -> () { self.policy = Box::new(NonePolicy); }
+
+    fn export_check(&self, ctxt: &filter::Context) -> Result<Grade, PolicyError> {
+        match self.get_policy().check(&ctxt) {
+            Ok(_) => {
+                Ok(self.inner.clone())
+            }, 
+            Err(pe) => { Err(pe) }
         }
+    }
+
+    fn export(self) -> Grade {
+        self.inner
+    }
+    
+}
+
+impl PoliciedGrade {
+    pub fn make(student_id: String, grade: i64, policy: Box<dyn Policy>) -> PoliciedGrade {
+        PoliciedGrade { 
+            inner: Grade {
+                student_id, grade
+            },
+            policy
+        }
+    }
+    pub fn student_id(&self) -> PoliciedString {
+        PoliciedString::make(self.inner.clone().student_id, self.policy.clone())
+    }
+    pub fn grade(&self) -> PoliciedNumber {
+        PoliciedNumber::make(self.inner.clone().grade, self.policy.clone())
     }
 }
