@@ -73,6 +73,7 @@ pub fn policied_derive(input: TokenStream) -> TokenStream {
 
 
   let expanded_derive = quote! {
+    #[typetag::serde]
     impl Policied for #name {
       fn get_policy(&self) -> &Box<dyn Policy> { &self.policy }
       fn remove_policy(&mut self) -> () { self.policy = Box::new(NonePolicy); }
