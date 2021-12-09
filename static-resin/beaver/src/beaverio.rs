@@ -44,7 +44,7 @@ impl<W: Write> BeaverBufWriter<W> {
         }
     }
 
-    pub fn safe_serialize_json<P: Policied + serde::Serialize>(&mut self, buf: &Box<P>)
+    pub fn safe_write_json<P: Policied + serde::Serialize>(&mut self, buf: &Box<P>)
     -> Result<usize, Box<dyn Error>> {
         match buf.get_policy().export_check(&self.ctxt) {
             Ok(_) => { // TODO: Abstract into serializer and bufwriter separately
