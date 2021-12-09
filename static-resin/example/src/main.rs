@@ -157,20 +157,16 @@ fn main() {
     /*************************
         DESERIALIZING DATA
     **************************/    
+    let f_malte =  File::open("malte").unwrap();
 
-    let json = to_string(&malte_grade).unwrap();
-    println!("{:?}", json);
-    let de: grade::Grade = from_str(&json).unwrap();
+    // Deserialize grade from Malte's file
+    let mut br_deserialize = beaverio::BeaverBufReader::safe_create(f_malte);
+    let malte_grade_ds: grade::Grade = br_deserialize.safe_deserialize_line();
 
+    // Try and write malte's grade to a new file, where it will hopefully fail the export_check
     let f_deserialize = File::create("deserialize").expect("Unable to create file");
     let ctxt_ds = filter::FileContext {
-        file_name: "malte".to_owned(), 
+        file_name: "not_malte".to_owned(), 
         path: "src/".to_owned(),
     };
-
-    let mut bw_deserialize = beaverio::BeaverBufWriter::safe_create(f_deserialize, filter::Context::File(ctxt_ds));
-    match bw_deserialize.safe_write_json(&Box::new(de.clone())) {
-        Ok(s) => { println!("Wrote deserialized grade successfully {:?}", s); },
-        Err(e) => { println!("Uh oh {:?}", e); }
-    } 
 }

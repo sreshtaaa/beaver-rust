@@ -1,12 +1,14 @@
 use std::error::Error;
 use std::io::{BufWriter, Write, BufReader, Read, BufRead};
 
+use serde::de::DeserializeOwned;
+
 use crate::policy;
 use crate::filter;
 use crate::policy::Policied;
 use crate::policy::PolicyError;
 
-extern crate serde; // Why do we have to use normal serde here but erased_serde in policy.rs? 
+extern crate serde;
 
 pub fn export_and_release(context: &filter::Context, s: &policy::PoliciedString) -> Result<String, Box<PolicyError>> {
     match s.get_policy().export_check(&context) {
@@ -71,21 +73,21 @@ impl<W: Write> BeaverBufWriter<W> {
 
 pub struct BeaverBufReader<R: Read> {
     buf_reader: BufReader<R>,
-    ctxt: filter::Context,
+    // ctxt: filter::Context,
 }
 
 impl<R: Read> BeaverBufReader<R> {
-    pub fn safe_create(inner: R, context: filter::Context) -> BeaverBufReader<R> {
+    pub fn safe_create(inner: R, /*context: filter::Context*/) -> BeaverBufReader<R> {
         BeaverBufReader {
             buf_reader: BufReader::new(inner), 
-            ctxt: context,
+            // ctxt: context,
         }
     }
 
-    pub fn safe_read_raw_line(&mut self) -> String {
+    pub fn safe_deserialize_line<T: serde::de::DeserializeOwned>(&mut self) -> T {
         let mut deserialized_string = String::new(); 
-        self.buf_reader.read_line(&mut deserialized_string);
-        deserialized_string
+        self.buf_reader.read_line(&mut deserialized_string).unwrap(); // TODO: handle this 
+        serde_json::from_reader(deserialized_string.as_bytes()).expect("Unable to deserialize data")
     }
 
     /* pub fn safe_read_raw(&mut self) -> String {
