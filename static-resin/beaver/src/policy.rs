@@ -6,6 +6,10 @@ use std::borrow::ToOwned;
 
 extern crate beaver_derive;
 use beaver_derive::Policied;
+use crate::derive_policied;
+use crate::derive_policied_vec;
+use crate::derive_policied_option;
+
 
 extern crate serde;
 extern crate erased_serde;
@@ -95,37 +99,7 @@ impl Policy for MergePolicy {
 
 // ------------------- LIBRARY POLICIED STRUCTS --------------------------------------
 
-//derive_policied!(String, PoliciedString);
-
-#[derive(Serialize)]
-//#[derive(Policied, Serialize)]
-pub struct PoliciedString {
-    pub(crate) inner: String, 
-    policy: Box<dyn Policy>,
-}
-
-impl Policied<String> for PoliciedString {
-    fn make(inner: String, policy: Box<dyn Policy>) -> PoliciedString {
-        PoliciedString {
-            inner, policy
-        }
-    }
-    fn get_policy(&self) -> &Box<dyn Policy> {
-        &self.policy
-    }
-    fn remove_policy(&mut self) -> () { self.policy = Box::new(NonePolicy); }
-    fn export_check(&self, ctxt: &filter::Context) -> Result<String, PolicyError> {
-        match self.get_policy().check(&ctxt) {
-            Ok(_) => {
-                Ok(self.inner.clone())
-            }, 
-            Err(pe) => { Err(pe) }
-        }
-    }
-    fn export(&self) -> String {
-        self.inner.clone()
-    }
-}
+derive_policied!(String, PoliciedString);
 
 impl PoliciedString {
     pub fn push_str(&mut self, string: &str) {
@@ -156,132 +130,8 @@ impl ToOwned for PoliciedString {
     }
 }
 
-//#[derive(Policied, Serialize)]
-#[derive(Serialize)]
-pub struct PoliciedNumber {
-    pub(crate) inner: i64,  
-    policy: Box<dyn Policy>,
-}
+derive_policied!(i64, Policiedi64);
 
-impl Policied<i64> for PoliciedNumber {
-    fn make(inner: i64, policy: Box<dyn Policy>) -> PoliciedNumber {
-        PoliciedNumber {
-            inner, policy
-        }
-    }
-    fn get_policy(&self) -> &Box<dyn Policy> {
-        &self.policy
-    }
-    fn remove_policy(&mut self) -> () { self.policy = Box::new(NonePolicy); }
-    fn export_check(&self, ctxt: &filter::Context) -> Result<i64, PolicyError> {
-        match self.get_policy().check(&ctxt) {
-            Ok(_) => {
-                Ok(self.inner.clone())
-            }, 
-            Err(pe) => { Err(pe) }
-        }
-    }
-    fn export(&self) -> i64 {
-        self.inner.clone()
-    }
-}
+derive_policied_vec!(PoliciedStringVec, String, PoliciedString);
 
-//derive_policied_vec!(PoliciedStringVec, String, PoliciedString);
-#[derive(Serialize)]
-pub struct PoliciedStringVec {
-    inner: Vec<String>,
-    policy: Box<dyn Policy>,
-}
-
-impl Policied<Vec<String>> for PoliciedStringVec {
-    fn make(inner: Vec<String>, policy: Box<dyn Policy>) -> PoliciedStringVec {
-        PoliciedStringVec {
-            inner, policy
-        }
-    }
-    fn get_policy(&self) -> &Box<dyn Policy> {
-        &self.policy
-    }
-    fn remove_policy(&mut self) -> () { self.policy = Box::new(NonePolicy); }
-    fn export_check(&self, ctxt: &filter::Context) -> Result<Vec<String>, PolicyError> {
-        match self.get_policy().check(&ctxt) {
-            Ok(_) => {
-                Ok(self.inner.clone())
-            }, 
-            Err(pe) => { Err(pe) }
-        }
-    }
-    fn export(&self) -> Vec<String> {
-        self.inner.clone()
-    }
-}
-
-impl PoliciedStringVec {
-    pub fn push(&mut self, value: String) {
-        self.inner.push(value);
-    }
-
-    pub fn push_policy(&mut self, value: PoliciedString) {
-        self.policy = self.policy.merge(value.get_policy()).unwrap();
-        self.inner.push(value.export());
-    }
-
-    pub fn pop(&mut self) -> Option<PoliciedString> {
-        match self.inner.pop() {
-            Some(v) => Some(PoliciedString { inner: v, policy: self.policy.clone() }),
-            None => None
-        }
-    }
-}
-
-//derive_policied_option!(PoliciedStringOption, String, PoliciedString);
-#[derive(Serialize)]
-pub struct PoliciedStringOption {
-    inner: Option<String>,
-    policy: Box<dyn Policy>,
-}
-
-impl Policied<Option<String>> for PoliciedStringOption {
-    fn make(inner: Option<String>, policy: Box<dyn Policy>) -> PoliciedStringOption {
-        PoliciedStringOption {
-            inner, policy
-        }
-    }
-    fn get_policy(&self) -> &Box<dyn Policy> {
-        &self.policy
-    }
-    fn remove_policy(&mut self) -> () { self.policy = Box::new(NonePolicy); }
-    fn export_check(&self, ctxt: &filter::Context) -> Result<Option<String>, PolicyError> {
-        match self.get_policy().check(&ctxt) {
-            Ok(_) => {
-                Ok(self.inner.clone())
-            }, 
-            Err(pe) => { Err(pe) }
-        }
-    }
-    fn export(&self) -> Option<String> {
-        self.inner.clone()
-    }
-}
-
-impl PoliciedStringOption {
-    pub fn make_option(ops: Option<PoliciedString>) -> Self {
-        match ops {
-            Some(s) => PoliciedStringOption {
-                inner: Some(s.export()),
-                policy: s.policy.clone()
-            },
-            None => PoliciedStringOption {
-                inner: None,
-                policy: Box::new(NonePolicy)
-            }
-        }
-    }
-
-    pub fn get_option(self) -> Option<PoliciedString> {
-        match self.inner {
-            Some(s) => Some(PoliciedString::make(s, self.policy.clone())),
-            None => None
-        }
-    }
-}
+derive_policied_option!(PoliciedStringOption, String, PoliciedString);

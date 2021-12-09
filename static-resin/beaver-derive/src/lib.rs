@@ -5,7 +5,7 @@ extern crate quote;
 
 use proc_macro::TokenStream;
 
-#[proc_macro_derive(Policied, attributes(policy_protected))]
+#[proc_macro_derive(Policied, attributes(policied, policy_protected))]
 pub fn policied_derive(input: TokenStream) -> TokenStream {
 
   let input = syn::parse_macro_input!(input as syn::DeriveInput);

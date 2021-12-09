@@ -1,7 +1,8 @@
 use beaver::{policy, filter};
-use beaver::policy::{Policy, Policied, PolicyError, NonePolicy, PoliciedNumber, PoliciedString};
+use beaver::policy::{Policy, Policied, PolicyError, NonePolicy, PoliciedString, Policiedi64};
 extern crate beaver_derive;
 use beaver_derive::Policied;
+use beaver::derive_policied;
 
 #[derive(Clone, Serialize)]
 pub struct GradePolicy { 
@@ -72,6 +73,7 @@ fn opt_eq<T: std::cmp::PartialEq>(obj1: &T, obj2: &Option<T>) -> bool {
 }
 
 //#[derive(Policied, Serialize)]
+// #[policied(PoliciedGrade)]
 #[derive(Serialize, Clone)]
 pub struct Grade {
     //#[policy_protected(PoliciedString)] 
@@ -81,35 +83,10 @@ pub struct Grade {
     pub grade: i64, 
 }
 
-#[derive(Serialize)]
-pub struct PoliciedGrade {
-    inner: Grade,
-    policy: Box<dyn Policy>,
-}
-
-impl Policied<Grade> for PoliciedGrade {
-    fn make(inner: Grade, policy: Box<dyn Policy>) -> PoliciedGrade {
-        PoliciedGrade { inner, policy }
-    }
-    fn get_policy(&self) -> &Box<dyn Policy> {
-        &self.policy
-    }
-    fn remove_policy(&mut self) -> () { self.policy = Box::new(NonePolicy); }
-    fn export_check(&self, ctxt: &filter::Context) -> Result<Grade, PolicyError> {
-        match self.get_policy().check(&ctxt) {
-            Ok(_) => {
-                Ok(self.inner.clone())
-            }, 
-            Err(pe) => { Err(pe) }
-        }
-    }
-    fn export(&self) -> Grade {
-        self.inner.clone()
-    }
-}
+derive_policied!(Grade, PoliciedGrade);
 
 impl PoliciedGrade {
-    pub fn make(student_id: String, grade: i64, policy: Box<dyn Policy>) -> PoliciedGrade {
+    pub fn make_decomposed_unpolicied(student_id: String, grade: i64, policy: Box<dyn Policy>) -> PoliciedGrade {
         PoliciedGrade { 
             inner: Grade {
                 student_id, grade
@@ -117,10 +94,19 @@ impl PoliciedGrade {
             policy
         }
     }
+    pub fn make_decomposed_policied(student_id: PoliciedString, grade: Policiedi64, policy: Box<dyn Policy>) -> PoliciedGrade {
+        PoliciedGrade { 
+            inner: Grade {
+                student_id: student_id.export(), 
+                grade: grade.export()
+            },
+            policy: student_id.get_policy().merge(grade.get_policy()).unwrap()
+        }
+    }
     pub fn student_id(&self) -> PoliciedString {
         PoliciedString::make(self.inner.clone().student_id, self.policy.clone())
     }
-    pub fn grade(&self) -> PoliciedNumber {
-        PoliciedNumber::make(self.inner.clone().grade, self.policy.clone())
+    pub fn grade(&self) -> Policiedi64 {
+        Policiedi64::make(self.inner.clone().grade, self.policy.clone())
     }
 }
