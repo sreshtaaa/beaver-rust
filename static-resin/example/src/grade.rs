@@ -88,12 +88,13 @@ pub struct PoliciedGrade {
 }
 
 impl Policied<Grade> for PoliciedGrade {
+    fn make(inner: Grade, policy: Box<dyn Policy>) -> PoliciedGrade {
+        PoliciedGrade { inner, policy }
+    }
     fn get_policy(&self) -> &Box<dyn Policy> {
         &self.policy
     }
-
     fn remove_policy(&mut self) -> () { self.policy = Box::new(NonePolicy); }
-
     fn export_check(&self, ctxt: &filter::Context) -> Result<Grade, PolicyError> {
         match self.get_policy().check(&ctxt) {
             Ok(_) => {
@@ -102,11 +103,9 @@ impl Policied<Grade> for PoliciedGrade {
             Err(pe) => { Err(pe) }
         }
     }
-
-    fn export(self) -> Grade {
-        self.inner
+    fn export(&self) -> Grade {
+        self.inner.clone()
     }
-    
 }
 
 impl PoliciedGrade {
