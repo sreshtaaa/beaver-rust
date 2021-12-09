@@ -265,6 +265,19 @@ impl Policied<Option<String>> for PoliciedStringOption {
 }
 
 impl PoliciedStringOption {
+    pub fn make_option(ops: Option<PoliciedString>) -> Self {
+        match ops {
+            Some(s) => PoliciedStringOption {
+                inner: Some(s.export()),
+                policy: s.policy.clone()
+            },
+            None => PoliciedStringOption {
+                inner: None,
+                policy: Box::new(NonePolicy)
+            }
+        }
+    }
+
     pub fn get_option(self) -> Option<PoliciedString> {
         match self.inner {
             Some(s) => Some(PoliciedString::make(s, self.policy.clone())),
