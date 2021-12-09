@@ -8,7 +8,7 @@ use crate::policy::PolicyError;
 
 extern crate serde; // Why do we have to use normal serde here but erased_serde in policy.rs? 
 
-pub fn export(context: &filter::Context, s: &policy::PoliciedString) -> Result<String, Box<PolicyError>> {
+pub fn export_and_release(context: &filter::Context, s: &policy::PoliciedString) -> Result<String, Box<PolicyError>> {
     match s.get_policy().export_check(&context) {
         Ok(_) => { Ok(s.string.clone()) }, 
         Err(pe) => { Err(Box::new(pe)) }
