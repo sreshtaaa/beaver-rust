@@ -73,7 +73,7 @@ fn opt_eq<T: std::cmp::PartialEq>(obj1: &T, obj2: &Option<T>) -> bool {
     }
 }
 
-#[derive(Policied, Serialize, Deserialize)]
+#[derive(Policied, Serialize, Deserialize, Clone)]
 pub struct Grade {
     #[policy_protected(PoliciedString)] 
     student_id: String, 

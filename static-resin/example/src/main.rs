@@ -5,6 +5,7 @@ use std::fs::File;
 mod grade;
 use beaver::{filter, beaverio};
 use beaver::policy::Policied;
+use serde_json::{to_string, from_str};
 
 use std::net;
 
@@ -52,11 +53,11 @@ fn main() {
     let mut malte_student_id = Box::new(malte_grade.student_id());
     let mut kinan_student_id = Box::new(kinan_grade.student_id());
 
-    match bw_malte.safe_write_serialized(&malte_student_id) {
+    match bw_malte.safe_serialize_json(&Box::new(malte_grade.clone())) {
         Ok(s) => { println!("Wrote Malte's grade successfully with size: {:?}", s); },
         Err(e) => { println!("Uh oh {:?}", e); }
     } 
-    match bw_malte.safe_write_serialized(&kinan_student_id) {
+    match bw_malte.safe_serialize_json(&kinan_student_id) {
         Ok(_) => { println!("Uh oh! Security breach!"); },
         Err(e) => { println!("Successfully errored writing Kinan's grade: {:?}", e); }
     } 
@@ -66,7 +67,7 @@ fn main() {
     **********************/
 
     (*malte_student_id).push_policy_str(&kinan_student_id);
-    match bw_malte.safe_write_serialized(&malte_student_id) {
+    match bw_malte.safe_serialize_json(&malte_student_id) {
         Ok(_) => { println!("Uh oh! Security breach!"); },
         Err(e) => { println!("Successfully errored writing Malte's + Kinan's grade: {:?}", e); }
     } 
@@ -78,7 +79,7 @@ fn main() {
     };
 
     let mut bw_livia = beaverio::BeaverBufWriter::safe_create(f_livia, filter::Context::File(ctxt_livia));
-    match bw_livia.safe_write_serialized(&malte_student_id) {
+    match bw_livia.safe_serialize_json(&malte_student_id) {
         Ok(s) => { println!("Wrote Malte + Kinan's grade successfully with size: {:?}", s); },
         Err(e) => { println!("Uh oh {:?}", e); }
     } 
@@ -88,7 +89,7 @@ fn main() {
     **********************/
     let sreshtaa_student_id = Box::new(sreshtaa_grade.student_id());
 
-    match bw_malte.safe_write_serialized(&sreshtaa_student_id) {
+    match bw_malte.safe_serialize_json(&sreshtaa_student_id) {
         Ok(s) => { println!("Uh oh! {:?}", s); },
         Err(e) => { println!("Successfully prevented from writing Sreshtaa's ID to Malte's file: {:?}", e); }
     }
@@ -96,7 +97,7 @@ fn main() {
     sreshtaa_grade.remove_policy();
     let new_student_id = Box::new(sreshtaa_grade.student_id());
 
-    match bw_malte.safe_write_serialized(&new_student_id) {
+    match bw_malte.safe_serialize_json(&new_student_id) {
         Ok(s) => { println!("Able to write Sreshtaa's data to Malte's file with size: {:?}", s); },
         Err(e) => { println!("Uh oh! {:?}", e); }
     }
@@ -105,14 +106,15 @@ fn main() {
         NETWORK CONNECTIONS
     **************************/
 
+    /*
     // Note: On your local computer, run the following command: nc -l 5000 to open a listening socket
     // Currently, if any of the sockets are not listening, the thread panics since the TCP connection failed
     // TODO: change code so that it doesn't panic
     
-    // let net_ctxt_sreshtaa = filter::RemoteConnectContext {
-    //     remote_ip_address: self_ip_addr.clone(), 
-    //     port: 5000, 
-    // };
+    let net_ctxt_sreshtaa = filter::RemoteConnectContext {
+        remote_ip_address: self_ip_addr.clone(), 
+        port: 5000, 
+    };
 
     let net_ctxt_adversary = filter::RemoteConnectContext {
         remote_ip_address: adversary_ip_addr.clone(), 
@@ -150,5 +152,25 @@ fn main() {
         Ok(s) => { println!("Sent Sreshtaa's grades to instructor's Ip Address: {:?}", &instructor_ip_addr); },
         Err(e) => { println!("Uh oh! Could not send Sreshtaa's grade over the network: {:?}", e); }
     }
+    */
 
+    /*************************
+        DESERIALIZING DATA
+    **************************/    
+
+    let json = to_string(&malte_grade).unwrap();
+    println!("{:?}", json);
+    let de: grade::Grade = from_str(&json).unwrap();
+
+    let f_deserialize = File::create("deserialize").expect("Unable to create file");
+    let ctxt_ds = filter::FileContext {
+        file_name: "malte".to_owned(), 
+        path: "src/".to_owned(),
+    };
+
+    let mut bw_deserialize = beaverio::BeaverBufWriter::safe_create(f_deserialize, filter::Context::File(ctxt_ds));
+    match bw_deserialize.safe_serialize_json(&Box::new(de.clone())) {
+        Ok(s) => { println!("Wrote deserialized grade successfully {:?}", s); },
+        Err(e) => { println!("Uh oh {:?}", e); }
+    } 
 }
