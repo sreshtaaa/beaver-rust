@@ -59,8 +59,7 @@ impl Policy for GradePolicy {
 
      fn merge(&self, other: &Box<dyn Policy>) ->  Result<Box<dyn Policy>, PolicyError>{
         Ok(Box::new(policy::MergePolicy::make( 
-            Box::new(self.clone()),
-            other.clone(),
+            vec![Box::new(self.clone()), other.clone()],
         )))
      }
 }
@@ -72,14 +71,13 @@ fn opt_eq<T: std::cmp::PartialEq>(obj1: &T, obj2: &Option<T>) -> bool {
     }
 }
 
-//#[derive(Policied, Serialize)]
-// #[policied(PoliciedGrade)]
-#[derive(Serialize, Clone)]
+#[derive(Serialize, Clone, Policied)]
+#[policied(PoliciedGrade)]
 pub struct Grade {
-    //#[policy_protected(PoliciedString)] 
+    #[policy_protected(PoliciedString)] 
     pub student_id: String, 
 
-    //#[policy_protected(PoliciedNumber)] 
+    #[policy_protected(Policiedi64)] 
     pub grade: i64, 
 }
 
@@ -93,20 +91,5 @@ impl PoliciedGrade {
             },
             policy
         }
-    }
-    pub fn make_decomposed_policied(student_id: PoliciedString, grade: Policiedi64, policy: Box<dyn Policy>) -> PoliciedGrade {
-        PoliciedGrade { 
-            inner: Grade {
-                student_id: student_id.export(), 
-                grade: grade.export()
-            },
-            policy: student_id.get_policy().merge(grade.get_policy()).unwrap()
-        }
-    }
-    pub fn student_id(&self) -> PoliciedString {
-        PoliciedString::make(self.inner.clone().student_id, self.policy.clone())
-    }
-    pub fn grade(&self) -> Policiedi64 {
-        Policiedi64::make(self.inner.clone().grade, self.policy.clone())
     }
 }
