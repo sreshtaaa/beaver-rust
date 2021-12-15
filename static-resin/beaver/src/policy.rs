@@ -2,10 +2,8 @@ use std::fmt;
 use crate::filter;
 use std::error;
 use dyn_clone::DynClone;
-use std::borrow::ToOwned;
 
 extern crate beaver_derive;
-use beaver_derive::Policied;
 use crate::derive_policied;
 use crate::derive_policied_vec;
 use crate::derive_policied_option;
