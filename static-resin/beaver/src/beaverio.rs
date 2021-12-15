@@ -77,14 +77,14 @@ pub struct BeaverBufReader<R: Read> {
 }
 
 impl<R: Read> BeaverBufReader<R> {
-    pub fn safe_create(inner: R, /*context: filter::Context*/) -> BeaverBufReader<R> {
+    pub fn safe_create(inner: R /*context: filter::Context*/) -> BeaverBufReader<R> {
         BeaverBufReader {
             buf_reader: BufReader::new(inner), 
             // ctxt: context,
         }
     }
 
-    pub fn safe_deserialize_line<T: serde::de::DeserializeOwned>(&mut self) -> T {
+    pub fn safe_deserialize_line<T: DeserializeOwned>(&mut self) -> T {
         let mut deserialized_string = String::new(); 
         self.buf_reader.read_line(&mut deserialized_string).unwrap(); // TODO: handle this 
         serde_json::from_reader(deserialized_string.as_bytes()).expect("Unable to deserialize data")
