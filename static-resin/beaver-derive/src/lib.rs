@@ -5,7 +5,6 @@ extern crate quote;
 
 use proc_macro::{TokenStream};
 use syn::Meta;
-use syn::export::Span;
 
 // TODO: better error messages!
 #[proc_macro_derive(Policied, attributes(policied, policy_protected))]
