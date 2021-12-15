@@ -1,1 +1,1 @@
-maltekinan
+{"inner":"maltekinan","policy":{"type":"MergePolicy","policies":[{"type":"GradePolicy","student_id":"malte","instructor_id":"livia","student_ip":null,"instructor_ip":"10.38.16.198"},{"type":"GradePolicy","student_id":"kinan","instructor_id":"livia","student_ip":null,"instructor_ip":"10.38.16.198"}]}}

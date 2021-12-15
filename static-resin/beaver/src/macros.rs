@@ -1,7 +1,7 @@
 #[macro_export]
 macro_rules! derive_policied {
     ($input_type:ty, $output_type:ident) => {
-        #[derive(Serialize)]
+        #[derive(Serialize, Deserialize, Clone)]
         pub struct $output_type {
             inner: $input_type,
             policy: Box<dyn Policy>
