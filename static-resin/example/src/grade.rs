@@ -1,10 +1,11 @@
 use beaver::{policy, filter};
 use beaver::policy::{Policy, Policied, PolicyError, NonePolicy, PoliciedString, Policiedi64};
 extern crate beaver_derive;
+extern crate typetag;
 use beaver_derive::Policied;
 use beaver::derive_policied;
 
-#[derive(Clone, Serialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct GradePolicy { 
     pub student_id: String,
     pub instructor_id: String, 
@@ -12,6 +13,7 @@ pub struct GradePolicy {
     pub instructor_ip: Option<String>, 
 }
 
+#[typetag::serde]
 impl Policy for GradePolicy {
     fn check(&self, ctxt: &filter::Context) -> Result<(), PolicyError> {
         match ctxt {
@@ -71,7 +73,7 @@ fn opt_eq<T: std::cmp::PartialEq>(obj1: &T, obj2: &Option<T>) -> bool {
     }
 }
 
-#[derive(Serialize, Clone, Policied)]
+#[derive(Serialize, Deserialize, Clone, Policied)]
 #[policied(PoliciedGrade)]
 pub struct Grade {
     #[policy_protected(PoliciedString)] 

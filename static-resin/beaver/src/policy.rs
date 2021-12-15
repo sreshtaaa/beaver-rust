@@ -13,16 +13,18 @@ use crate::derive_policied_option;
 
 extern crate serde;
 extern crate erased_serde;
+extern crate typetag;
 
 // ------------------- MAIN POLICY TRAITS/STRUCTS ----------------------------------
+#[typetag::serde(tag = "type")]
 pub trait Policy : DynClone + erased_serde::Serialize {
     fn check(&self, ctxt: &filter::Context) -> Result<(), PolicyError>; 
     fn merge(&self, _other: &Box<dyn Policy>) -> Result<Box<dyn Policy>, PolicyError>;
 }
 
 dyn_clone::clone_trait_object!(Policy);
-erased_serde::serialize_trait_object!(Policy);
-
+// erased_serde::serialize_trait_object!(Policy);
+// #[typetag::serde(tag = "type")]
 pub trait Policied<T> : erased_serde::Serialize { // why erased serde here? 
     fn make(inner: T, policy: Box<dyn Policy>) -> Self;
     fn get_policy(&self) -> &Box<dyn Policy>;
@@ -50,9 +52,10 @@ impl error::Error for PolicyError {
 
 // ------------------- LIBRARY POLICY STRUCTS --------------------------------------
 
-#[derive(Clone, Serialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct NonePolicy; // should NonePolicy be pub? (should people be allowed to set Policies to NonePolicy)
 
+#[typetag::serde]
 impl Policy for NonePolicy {
     fn check(&self, _ctxt: &filter::Context) -> Result<(), PolicyError> {
         Ok(())
@@ -64,7 +67,7 @@ impl Policy for NonePolicy {
 }
 
 // could store a vector of policies
-#[derive(Clone, Serialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct MergePolicy {
     policies: Vec<Box<dyn Policy>>
 }
@@ -75,6 +78,7 @@ impl MergePolicy {
     }
 }
 
+#[typetag::serde]
 impl Policy for MergePolicy {
     fn check(&self, ctxt: &filter::Context) -> Result<(), PolicyError> {
         let results: Result<Vec<_>, PolicyError> = self.policies.clone()
@@ -99,7 +103,6 @@ impl Policy for MergePolicy {
 // ------------------- LIBRARY POLICIED STRUCTS --------------------------------------
 
 derive_policied!(String, PoliciedString);
-
 impl PoliciedString {
     pub fn push_str(&mut self, string: &str) {
         self.inner.push_str(string)
@@ -118,16 +121,6 @@ impl PoliciedString {
         
     }
 } 
-
-impl ToOwned for PoliciedString {
-    type Owned = PoliciedString;
-    fn to_owned(&self) -> PoliciedString {
-        PoliciedString {
-            inner: self.inner.to_owned(),
-            policy: self.policy.clone(),
-        }
-    }
-}
 
 derive_policied!(i64, Policiedi64);
 
