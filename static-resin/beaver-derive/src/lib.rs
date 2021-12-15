@@ -36,7 +36,7 @@ pub fn policied_derive(input: TokenStream) -> TokenStream {
   }
 
   // all fields - name, type, and whether it is policy-protected
-  let mut all_fields: Vec<(syn::Ident, syn::Type, syn::Ident, bool)> = vec![];
+  let mut all_fields: Vec<(syn::Ident, syn::Type, Option<syn::Ident>, bool)> = vec![];
   match input.data {
       // Only process structs
       syn::Data::Struct(ref data_struct) => {
@@ -60,7 +60,7 @@ pub fn policied_derive(input: TokenStream) -> TokenStream {
                                   match ty {
                                     syn::NestedMeta::Meta(ty_meta) => {
                                       is_policy_protected = true;
-                                      all_fields.push((field_name.clone(), field.clone().ty, ty_meta.clone().name(), true));
+                                      all_fields.push((field_name.clone(), field.clone().ty, Some(ty_meta.clone().name()), true));
                                     }
                                     _ => panic!("Inner list must be type, not string literal"),
                                   }
@@ -71,7 +71,7 @@ pub fn policied_derive(input: TokenStream) -> TokenStream {
                           } 
                       }
                       if !is_policy_protected {
-                        all_fields.push((field_name.clone(), field.clone().ty, syn::Ident::new("DangerDefault", syn::export::Span::call_site()), false));
+                        all_fields.push((field_name.clone(), field.clone().ty, None, false));
                       }
                   }
               }
@@ -88,8 +88,11 @@ pub fn policied_derive(input: TokenStream) -> TokenStream {
   let make_decomposed_arguments = all_fields.clone().iter().fold(
     quote!(), |es, (name, ty_original, ty_protected, is_protected)| 
     if *is_protected {
-      quote! {
-        #es #name: #ty_protected,
+      match ty_protected {
+        Some(ty) => {
+          quote! { #es #name: #ty, }
+        },
+        None => panic!("No protected type")
       }
     } else {
       quote! {
@@ -139,13 +142,18 @@ pub fn policied_derive(input: TokenStream) -> TokenStream {
   let expanded_protected = all_fields.clone().iter().fold(
     quote!(), |es, (name, _, ty_protected, is_protected)| 
     if *is_protected {
-      quote! {
-        #es
-        pub fn #name(&self) -> #ty_protected {
-          #ty_protected::make(
-            self.inner.clone().#name,
-            self.policy.clone()
-          )}}
+      match ty_protected {
+        Some(ty) => {
+          quote! { #es
+            pub fn #name(&self) -> #ty {
+              #ty::make(
+                self.inner.clone().#name,
+                self.policy.clone()
+              )}}
+        },
+        None => panic!("No protected type")
+      }
+      
     } else {
       quote!(#es)
     });
