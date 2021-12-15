@@ -3,19 +3,40 @@ extern crate syn;
 #[macro_use]
 extern crate quote;
 
-use proc_macro::TokenStream;
+use proc_macro::{TokenStream};
+use syn::Meta;
+use syn::export::Span;
 
-#[proc_macro_derive(Policied, attributes(policy_protected))]
+// TODO: better error messages!
+#[proc_macro_derive(Policied, attributes(policied, policy_protected))]
 pub fn policied_derive(input: TokenStream) -> TokenStream {
 
   let input = syn::parse_macro_input!(input as syn::DeriveInput);
 
   // get the name of the type we want to implement the trait for
-  let name = &input.ident;
+  let unpolicied_name = &input.ident;
+  let mut policied_name = unpolicied_name.clone();
 
-  // Find the name of members we need to duplicate
-  let mut protected: Vec<(syn::Ident, syn::Ident)> = vec![];
+  for attr in input.attrs.iter() {
+    match attr.parse_meta().unwrap() {
+      Meta::List(inner_list) => {
+        for ty in inner_list.nested.iter() {
+          match ty {
+            syn::NestedMeta::Meta(ty_meta) => {
+              policied_name = ty_meta.clone().name();
+              
+            }
+            _ => panic!("Inner list must be type, not string literal"),
+          }
+        }
+      },
+      _ => panic!("policied attr must designate Policied type")
+    }
+    
+  }
 
+  // all fields - name, type, and whether it is policy-protected
+  let mut all_fields: Vec<(syn::Ident, syn::Type, syn::Ident, bool)> = vec![];
   match input.data {
       // Only process structs
       syn::Data::Struct(ref data_struct) => {
@@ -25,6 +46,8 @@ pub fn policied_derive(input: TokenStream) -> TokenStream {
               syn::Fields::Named(ref fields_named) => {
                   // Iterate over the fields
                   for field in fields_named.named.iter() {
+                      let field_name = field.clone().ident.unwrap();
+                      let mut is_policy_protected = false;
                       // Get attributes #[..] on each field
                       for attr in field.attrs.iter() {
                           // Parse the attribute
@@ -36,9 +59,8 @@ pub fn policied_derive(input: TokenStream) -> TokenStream {
                                 for ty in inner_list.nested.iter() {
                                   match ty {
                                     syn::NestedMeta::Meta(ty_meta) => {
-                                      // Save the protected elements
-                                      let attr = field.clone();
-                                      protected.push((attr.ident.unwrap(), ty_meta.clone().name()));
+                                      is_policy_protected = true;
+                                      all_fields.push((field_name.clone(), field.clone().ty, ty_meta.clone().name(), true));
                                     }
                                     _ => panic!("Inner list must be type, not string literal"),
                                   }
@@ -46,7 +68,10 @@ pub fn policied_derive(input: TokenStream) -> TokenStream {
                               }
                               _ => panic!("Must have return type in inner list"),
                             }
-                          }
+                          } 
+                      }
+                      if !is_policy_protected {
+                        all_fields.push((field_name.clone(), field.clone().ty, syn::Ident::new("String", syn::export::Span::call_site()), false));
                       }
                   }
               }
@@ -60,26 +85,74 @@ pub fn policied_derive(input: TokenStream) -> TokenStream {
       _ => panic!("Must be a struct"),
   }
 
-  let expanded_protected = protected.iter().fold(
-    quote!(), |es, (name, ty)| quote! {
-      #es
-      pub fn #name(&self) -> #ty {
-        #ty::make(
-          self.#name.clone(),
-          self.policy.clone()
-        )
+  let make_decomposed_arguments = all_fields.clone().iter().fold(
+    quote!(), |es, (name, ty_original, ty_protected, is_protected)| 
+    if *is_protected {
+      quote! {
+        #es #name: #ty_protected,
       }
-    });
-
-
-  let expanded_derive = quote! {
-    #[typetag::serde]
-    impl Policied for #name {
-      fn get_policy(&self) -> &Box<dyn Policy> { &self.policy }
-      fn remove_policy(&mut self) -> () { self.policy = Box::new(NonePolicy); }
+    } else {
+      quote! {
+        #es #name: #ty_original,
+      }
     }
+  );
 
-    impl #name {
+  let policies = all_fields.clone().iter().fold(
+    quote!(let new_policy = policy), |es, (name, _, _, is_protected)|
+    if *is_protected {
+      quote! {
+        #es.merge(#name.get_policy()).unwrap()
+      }
+    } else {
+      quote!{#es}
+    }
+  );
+
+  let make_decomposed_constructor_inner = all_fields.clone().iter().fold(
+    quote!(), |es, (name, _, _, is_protected)| 
+    if *is_protected {
+      quote! {
+        #es
+        #name: #name.export(),
+      }
+    } else {
+      quote! {
+        #es
+        #name,
+      }
+    }
+  );
+
+  let make_decomposed = quote! {
+    pub fn make_decomposed(#make_decomposed_arguments policy: Box<dyn Policy>) -> Self {
+      #policies;
+      #policied_name::make(
+        #unpolicied_name {
+          #make_decomposed_constructor_inner
+        },
+        new_policy
+      )
+    }
+  };
+
+  let expanded_protected = all_fields.clone().iter().fold(
+    quote!(), |es, (name, _, ty_protected, is_protected)| 
+    if *is_protected {
+      quote! {
+        #es
+        pub fn #name(&self) -> #ty_protected {
+          #ty_protected::make(
+            self.inner.clone().#name,
+            self.policy.clone()
+          )}}
+    } else {
+      quote!(#es)
+    });
+  
+  let expanded_derive = quote! {
+    impl #policied_name {
+      #make_decomposed
       #expanded_protected
     }
   };

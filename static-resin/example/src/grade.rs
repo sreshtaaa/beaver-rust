@@ -1,8 +1,9 @@
 use beaver::{policy, filter};
-use beaver::policy::{Policy, Policied, PolicyError, NonePolicy, PoliciedNumber, PoliciedString};
+use beaver::policy::{Policy, Policied, PolicyError, NonePolicy, PoliciedString, Policiedi64};
 extern crate beaver_derive;
 extern crate typetag;
 use beaver_derive::Policied;
+use beaver::derive_policied;
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct GradePolicy { 
@@ -14,7 +15,7 @@ pub struct GradePolicy {
 
 #[typetag::serde]
 impl Policy for GradePolicy {
-    fn export_check(&self, ctxt: &filter::Context) -> Result<(), PolicyError> {
+    fn check(&self, ctxt: &filter::Context) -> Result<(), PolicyError> {
         match ctxt {
             filter::Context::File(fc) => {
                 if fc.file_name.eq(&self.student_id) || fc.file_name.eq(&self.instructor_id) {
@@ -60,8 +61,7 @@ impl Policy for GradePolicy {
 
      fn merge(&self, other: &Box<dyn Policy>) ->  Result<Box<dyn Policy>, PolicyError>{
         Ok(Box::new(policy::MergePolicy::make( 
-            Box::new(self.clone()),
-            other.clone(),
+            vec![Box::new(self.clone()), other.clone()],
         )))
      }
 }
@@ -73,21 +73,25 @@ fn opt_eq<T: std::cmp::PartialEq>(obj1: &T, obj2: &Option<T>) -> bool {
     }
 }
 
-#[derive(Policied, Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Policied)]
+#[policied(PoliciedGrade)]
 pub struct Grade {
     #[policy_protected(PoliciedString)] 
-    student_id: String, 
+    pub student_id: String, 
 
-    #[policy_protected(PoliciedNumber)] 
-    grade: i64, 
-
-    policy: Box<dyn Policy>,
+    #[policy_protected(Policiedi64)] 
+    pub grade: i64, 
 }
 
-impl Grade {
-    pub fn make(student_id: String, grade: i64, policy: Box<dyn Policy>) -> Grade {
-        Grade {
-            student_id, grade, policy
+derive_policied!(Grade, PoliciedGrade);
+
+impl PoliciedGrade {
+    pub fn make_decomposed_unpolicied(student_id: String, grade: i64, policy: Box<dyn Policy>) -> PoliciedGrade {
+        PoliciedGrade { 
+            inner: Grade {
+                student_id, grade
+            },
+            policy
         }
     }
 }

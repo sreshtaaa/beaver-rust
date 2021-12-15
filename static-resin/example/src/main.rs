@@ -34,9 +34,9 @@ fn main() {
     };
 
     // make a protected grade object— see policy.rs for the impl of Policy on the grade
-    let malte_grade = grade::Grade::make("malte".to_string(), 85, Box::new(gp_malte)); 
-    let kinan_grade = grade::Grade::make("kinan".to_string(), 87, Box::new(gp_kinan));
-    let mut sreshtaa_grade = grade::Grade::make("sreshtaa".to_string(), 82, Box::new(gp_sreshtaa));
+    let malte_grade = grade::PoliciedGrade::make_decomposed_unpolicied("malte".to_string(), 85, Box::new(gp_malte)); 
+    let kinan_grade = grade::PoliciedGrade::make_decomposed_unpolicied("kinan".to_string(), 87, Box::new(gp_kinan));
+    let mut sreshtaa_grade = grade::PoliciedGrade::make_decomposed_unpolicied("sreshtaa".to_string(), 82, Box::new(gp_sreshtaa));
     
     /***********************
         TEST EXPORT CHECK
@@ -161,7 +161,7 @@ fn main() {
 
     // Deserialize grade from Malte's file
     let mut br_deserialize = beaverio::BeaverBufReader::safe_create(f_malte);
-    let malte_grade_ds: grade::Grade = br_deserialize.safe_deserialize_line();
+    let malte_grade_ds: grade::PoliciedGrade = br_deserialize.safe_deserialize_line();
 
     // Try and write malte's grade to a new file, where it will hopefully fail the export_check
     let f_deserialize = File::create("deserialize").expect("Unable to create file");
