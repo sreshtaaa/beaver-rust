@@ -101,7 +101,7 @@ fn main() {
         Ok(s) => { println!("Able to write Sreshtaa's data to Malte's file with size: {:?}", s); },
         Err(e) => { println!("Uh oh! {:?}", e); }
     }
-
+    drop(bw_malte);
     /*************************
         NETWORK CONNECTIONS
     **************************/
@@ -169,4 +169,11 @@ fn main() {
         file_name: "not_malte".to_owned(), 
         path: "src/".to_owned(),
     };
+
+    let mut bw_not_malte = beaverio::BeaverBufWriter::safe_create(f_deserialize, filter::Context::File(ctxt_ds));
+
+    match bw_not_malte.safe_write_json(&Box::new(malte_grade_ds)) {
+        Ok(s) => { println!("Uh oh! {:?}", s); },
+        Err(e) => { println!("Successfully deserialized, checked policy on Malte's data and prevented write: {:?}", e); }
+    }
 }
