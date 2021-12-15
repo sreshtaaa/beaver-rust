@@ -71,7 +71,7 @@ pub fn policied_derive(input: TokenStream) -> TokenStream {
                           } 
                       }
                       if !is_policy_protected {
-                        all_fields.push((field_name.clone(), field.clone().ty, syn::Ident::new("String", syn::export::Span::call_site()), false));
+                        all_fields.push((field_name.clone(), field.clone().ty, syn::Ident::new("DangerDefault", syn::export::Span::call_site()), false));
                       }
                   }
               }
