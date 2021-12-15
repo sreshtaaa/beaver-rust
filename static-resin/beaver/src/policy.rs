@@ -67,33 +67,34 @@ impl Policy for NonePolicy {
 // could store a vector of policies
 #[derive(Clone, Serialize, Deserialize)]
 pub struct MergePolicy {
-    policies: Vec<Box<dyn Policy>>
+    policy1: Box<dyn Policy>,
+    policy2: Box<dyn Policy>,
 }
 
 impl MergePolicy {
-    pub fn make(policies: Vec<Box<dyn Policy>>) -> MergePolicy {
-        MergePolicy { policies }
+    pub fn make(policy1: Box<dyn Policy>, policy2: Box<dyn Policy>) -> MergePolicy {
+        MergePolicy { policy1, policy2 }
     }
 }
 
 #[typetag::serde]
 impl Policy for MergePolicy {
     fn check(&self, ctxt: &filter::Context) -> Result<(), PolicyError> {
-        let results: Result<Vec<_>, PolicyError> = self.policies.clone()
-                                                    .into_iter()
-                                                    .map(|p| p.check(ctxt))
-                                                    .collect();
-        match results {
-            Ok(_) => Ok(()),
-            Err(pe) => Err(pe)
+        match self.policy1.check(ctxt) {
+            Ok(_) => {
+                match (*self.policy2).check(ctxt) {
+                    Ok(_) => { Ok(()) },
+                    Err(pe) => { Err(pe) }
+                }
+            },
+            Err(pe) => { Err(pe) }
         }
     }
 
     fn merge(&self, other: &Box<dyn Policy>) -> Result<Box<dyn Policy>, PolicyError> {
-        let mut new_policies = self.policies.clone();
-        new_policies.push(other.clone());
         Ok(Box::new(MergePolicy { 
-            policies: new_policies
+            policy1: Box::new(self.clone()),
+            policy2: other.clone(),
         }))
     }
 }

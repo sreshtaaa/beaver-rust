@@ -61,7 +61,8 @@ impl Policy for GradePolicy {
 
      fn merge(&self, other: &Box<dyn Policy>) ->  Result<Box<dyn Policy>, PolicyError>{
         Ok(Box::new(policy::MergePolicy::make( 
-            vec![Box::new(self.clone()), other.clone()],
+            Box::new(self.clone()),
+            other.clone(),
         )))
      }
 }
