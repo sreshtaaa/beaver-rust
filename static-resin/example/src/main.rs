@@ -130,12 +130,6 @@ fn main() {
 
     // Note: On your local computer, run the following command: nc -l 5000 to open a listening socket
     // Currently, if any of the sockets are not listening, the thread panics since the TCP connection failed
-    // TODO: change code so that it doesn't panic
-    
-    let net_ctxt_sreshtaa = filter::RemoteConnectContext {
-        remote_ip_address: self_ip_addr.clone(), 
-        port: 5000, 
-    };
 
     let net_ctxt_adversary = filter::RemoteConnectContext {
         remote_ip_address: adversary_ip_addr.clone(), 
@@ -146,15 +140,6 @@ fn main() {
         remote_ip_address: instructor_ip_addr.clone(), 
         port: 5000,
     };  
-
-    // Self Ip Address
-    let sreshtaa_stream = net::TcpStream::connect(((&net_ctxt_sreshtaa).remote_ip_address, (&net_ctxt_sreshtaa).port)).unwrap();
-    let mut bw_tcp_sreshtaa = beaverio::BeaverBufWriter::safe_create(sreshtaa_stream, filter::Context::ClientNetwork(net_ctxt_sreshtaa));
-
-    match bw_tcp_sreshtaa.safe_write_json(&sreshtaa_student_id) {
-        Ok(_) => { println!("Sent Sreshtaa's grade to Ip Address: {:?}", &self_ip_addr); },
-        Err(e) => { println!("Uh oh! Could not send Sreshtaa's grade over the network: {:?}", e); }
-    }
 
     // Random Ip Address
     let adv_stream = net::TcpStream::connect(((&net_ctxt_adversary).remote_ip_address, (&net_ctxt_adversary).port)).unwrap();
