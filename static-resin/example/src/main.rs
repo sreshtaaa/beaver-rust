@@ -8,7 +8,6 @@ use beaver::policy::Policied;
 use std::net;
 
 fn main() {
-    let self_ip_addr = net::IpAddr::V4(net::Ipv4Addr::new(127, 0, 0, 1));
     let adversary_ip_addr = net::IpAddr::V4(net::Ipv4Addr::new(10, 38, 53, 87));
     let instructor_ip_addr = net::IpAddr::V4(net::Ipv4Addr::new(10, 38, 16, 198));
 

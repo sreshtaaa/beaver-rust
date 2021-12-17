@@ -12,7 +12,7 @@ pub trait CustomContext {
     fn as_any(&self) -> &dyn Any;
 }
 
-// infer from file object? 
+// Possible extension: infer from file object? 
 pub struct FileContext {
     pub file_name: String,
     pub path: String,

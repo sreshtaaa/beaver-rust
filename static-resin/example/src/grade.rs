@@ -23,26 +23,10 @@ impl Policy for GradePolicy {
                 } else {
                     return Err(PolicyError { message: "File must belong to same student".to_string() })
                 }
-                /*
-                match fc.permission {
-                    filter::Permission::ReadOnly => Err(PolicyError { message: "Cannot write data with ReadOnly policy".to_string() }), 
-                    _ =>  {  // pretend student_id is the filename
-                        if fc.file_name.eq(&self.student_id) || fc.file_name.eq(&self.instructor_id) {
-                            return Ok(());
-                        } else {
-                            return Err(PolicyError { message: "File must belong to same student".to_string() })
-                        }
-                    }, 
-                }
-                */
             },
             filter::Context::ClientNetwork(rcc) => { 
-                //let self_ip = "127.0.0.1".to_string();
-
-                // Sample filter: only send data to trusted ip addresses
                 if opt_eq(&rcc.remote_ip_address.to_string(), &self.student_ip) || 
                     opt_eq(&rcc.remote_ip_address.to_string(), &self.instructor_ip) 
-                    //|| rcc.remote_ip_address.to_string().eq(&self_ip)
                 {
                     return Ok(()); 
                 } else {
