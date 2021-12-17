@@ -8,7 +8,7 @@ use beaver::policy::Policied;
 use std::net;
 
 fn main() {
-    let adversary_ip_addr = net::IpAddr::V4(net::Ipv4Addr::new(10, 38, 53, 87));
+    let _adversary_ip_addr = net::IpAddr::V4(net::Ipv4Addr::new(10, 38, 53, 87));
     let instructor_ip_addr = net::IpAddr::V4(net::Ipv4Addr::new(10, 38, 16, 198));
 
     let gp_malte = grade::GradePolicy { 
@@ -63,7 +63,7 @@ fn main() {
         MERGE POLICIES
     **********************/
 
-    (*malte_student_id).push_policy_str(&kinan_student_id);
+    (*malte_student_id).push_policy_str(&kinan_student_id).unwrap();
     match bw_malte.safe_write_json(&malte_student_id) {
         Ok(_) => { println!("Uh oh! Security breach!"); },
         Err(e) => { println!("Successfully errored writing Malte's + Kinan's grade: {:?}", e); }
@@ -127,9 +127,14 @@ fn main() {
         NETWORK CONNECTIONS
     **************************/
 
-    // Note: On your local computer, run the following command: nc -l 5000 to open a listening socket
+    // NOTE: On your local computer, run the following command: nc -l 5000 to open a listening socket
     // Currently, if any of the sockets are not listening, the thread panics since the TCP connection failed
 
+    // ANOTHER NOTE: Since there are specific IP addresses for the adversary and the instructor, these examples 
+    // won't work unless those IP addresses open network sockets that listen at port 5000. However, if you want to see 
+    // this work, please talk to the developers and they'd be happy to show you!
+
+    /*
     let net_ctxt_adversary = filter::RemoteConnectContext {
         remote_ip_address: adversary_ip_addr.clone(), 
         port: 5000,
@@ -157,4 +162,5 @@ fn main() {
         Ok(_) => { println!("Sent Sreshtaa's grades to instructor's Ip Address: {:?}", &instructor_ip_addr); },
         Err(e) => { println!("Uh oh! Could not send Sreshtaa's grade over the network: {:?}", e); }
     }
+    */
 }
