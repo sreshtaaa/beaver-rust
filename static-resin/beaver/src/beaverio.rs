@@ -55,7 +55,9 @@ impl<W: Write> BeaverBufWriter<W> {
             Err(pe) => { 
                 match &self.ctxt {
                     filter::Context::ClientNetwork(_) => {
-                        self.buf_writer.write(format!("Beaver Error: {}\n", pe).as_bytes());
+                        /* Note: the following line is for debugging purposes, but we don't actually want to write 
+                        anything across the network. */
+                        // self.buf_writer.write(format!("Beaver Error: {}\n", pe).as_bytes());
                         Err(Box::new(pe))
                     },
                     _ => Err(Box::new(pe)),

@@ -25,5 +25,5 @@ pub struct RemoteConnectContext {
 
 // TODO: Flesh out use case for this; do we need this? 
 pub struct ListenConnectionsContext {
-    ip_address: IpAddr,
+    _ip_address: IpAddr,
 }
