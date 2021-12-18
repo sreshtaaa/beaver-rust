@@ -6,8 +6,8 @@ BEAVER is a Resin-style IFC Library for Rust built by Sreshtaa Rajesh and Livia 
 
 Currently, we are unable to provide a demonstration of sending policied data across network sockets, due to the fact that we don't have a permanently listening socket. 
 
-If you would like to try out sending policied data over network connections, feel free to fork the repository and modify the IP addresses/ports in the `main.rs` file inside the `example` folder to IP addresses of devices that you have access to and can set up a listening socket from. Once you have this, run `nc -l <port-number>` to open a listening socket in another terminal at a given port. You may also need to update the filter contexts at the end of the file. 
+If you would like to try out sending policied data over network connections, feel free to fork the repository and modify the IP addresses/ports in the `main.rs` file inside the `example` folder to IP addresses of devices that you have access to and can set up a listening socket from. Once you have this, run `nc -l <port-number>` to open a listening socket in another terminal at a given port. Finally, uncomment the last portion titled "Network Connections" and update the filter contexts at the end of the file as necessary. 
 
-Currently, if any of the sockets are not listening, the thread panics since the TCP connection failed.  You may find that the while the program is trying to connect to a socket, the code looks like it's hanging, but it should either fail by itself, or you can press ^C to abort the connection. 
+Currently, if any of the sockets are not listening, the thread panics since the TCP connection failed.  You may find that the while the program is trying to connect to a socket, the code looks like it's hanging, but it should either fail by itself if the sockets ar not listening, or you can press ^C to abort the connection. 
 
-Let's build some dams! 
+Happy Beavering! Let's build some dams! 
