@@ -1,6 +1,6 @@
 # BEAVER
 
-BEAVER is a Resin-style IFC Library for Rust built by Sreshtaa Rajesh and Livia Zhu for CSCI2390: Privacy-Conscious Computer Systems. In this repo, we have 3 folders: `beaver`, `beaver-derive`, and `example`. `beaver` and `beaver-derive` comprise the BEAVER library, with `beaver-derive` providing our custom derive macro. `example` houses a simple Grade demo to show how programmers can use BEAVER. 
+BEAVER is a [Resin](https://pdos.csail.mit.edu/papers/resin:sosp09/resin:sosp09.pdf)-style IFC Library for Rust built by Sreshtaa Rajesh and Livia Zhu for CSCI2390: Privacy-Conscious Computer Systems. In this repo, we have 3 folders: `beaver`, `beaver-derive`, and `example`. `beaver` and `beaver-derive` comprise the BEAVER library, with `beaver-derive` providing our custom derive macro. `example` houses a simple Grade demo to show how programmers can use BEAVER. 
 
 **To run the example, please navigate to the `static-resin` directory and run `cargo run`!**
 
