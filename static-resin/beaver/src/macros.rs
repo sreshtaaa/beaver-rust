@@ -1,3 +1,9 @@
+/*
+This macro can be used to easily create a simple policied version of a type. 
+It creates a PoliciedTYPE struct and implements the Policied<TYPE> trait for it.
+
+Usage: derive_policied!(TYPE, PoliciedTYPE);
+*/
 #[macro_export]
 macro_rules! derive_policied {
     ($input_type:ty, $output_type:ident) => {
@@ -32,6 +38,15 @@ macro_rules! derive_policied {
     };
 }
 
+/*
+This macro can be used to easily create a policied vector that has elements of a 
+a policied type, where the policy on the vector is a merges version of the policies
+on its elements. 
+It creates a PoliciedTYPEVec struct and implements various vector operations.
+PoliciedTYPE must have been previously derived.
+
+Usage: derive_policied_vec!(PoliciedTYPEVec, TYPE, PoliciedTYPE);
+*/
 #[macro_export]
 macro_rules! derive_policied_vec {
     ($policied_vector_type:ident, $unpolicied_element_type:ty, $policied_element_type:ident) => {
@@ -61,6 +76,13 @@ macro_rules! derive_policied_vec {
     }
 }
 
+/*
+This macro can be used to easily create a policied option that may contain a policied type. 
+It creates a PoliciedTYPEOption struct and methods to create and obtain the option.
+PoliciedTYPE must have been previously derived.
+
+Usage: derive_policied_option!(PoliciedTYPEOption, TYPE, PoliciedTYPE);
+*/
 #[macro_export]
 macro_rules! derive_policied_option {
     ($policied_option_type:ident, $unpolicied_element_type:ty, $policied_element_type:ident) => {
