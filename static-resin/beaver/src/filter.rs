@@ -12,7 +12,7 @@ pub trait CustomContext {
     fn as_any(&self) -> &dyn Any;
 }
 
-// infer from file object? 
+// Possible extension: infer from file object? 
 pub struct FileContext {
     pub file_name: String,
     pub path: String,
@@ -25,5 +25,5 @@ pub struct RemoteConnectContext {
 
 // TODO: Flesh out use case for this; do we need this? 
 pub struct ListenConnectionsContext {
-    ip_address: IpAddr,
+    _ip_address: IpAddr,
 }

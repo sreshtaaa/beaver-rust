@@ -21,17 +21,13 @@ pub trait Policy : DynClone + erased_serde::Serialize {
 }
 
 dyn_clone::clone_trait_object!(Policy);
-// erased_serde::serialize_trait_object!(Policy);
-// #[typetag::serde(tag = "type")]
-pub trait Policied<T> : erased_serde::Serialize { // why erased serde here? 
+pub trait Policied<T> : erased_serde::Serialize { 
     fn make(inner: T, policy: Box<dyn Policy>) -> Self;
     fn get_policy(&self) -> &Box<dyn Policy>;
     fn remove_policy(&mut self) -> ();
     fn export(&self) -> T; 
     fn export_check(&self, ctxt: &filter::Context) -> Result<T, PolicyError>;
 }
-
-//erased_serde::serialize_trait_object!(Policied);
 
 #[derive(Debug, Clone)]
 pub struct PolicyError { pub message: String }
@@ -64,7 +60,7 @@ impl Policy for NonePolicy {
     }
 }
 
-// could store a vector of policies
+// Possile exploration: could store a vector of policies
 #[derive(Clone, Serialize, Deserialize)]
 pub struct MergePolicy {
     policy1: Box<dyn Policy>,
