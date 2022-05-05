@@ -212,7 +212,7 @@ pub fn policied_derive(input: TokenStream) -> TokenStream {
   ```
   pub fn x(&self) -> PoliciedOTHER1TYPE {
     PoliciedOTHER1TYPE::make(
-      self.inner.close().x,
+      self.inner.clone().x,
       self.policy.clone()
     )
   }
